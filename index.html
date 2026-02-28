@@ -12,8 +12,7 @@
     }
 
     :root {
-      --panel: #111826;
-      --line: #2b3b5a;
+      --line: #2a2a2a;
       --text: #ffffff;
       --muted: #aeb9cf;
       --blue: #5fafff;
@@ -200,12 +199,13 @@
       }
     }
 
+    /* CHANGED: dark grey translucent like sidebar */
     .panel {
       width: 100%;
       height: 100%;
-      border: 1px solid var(--line);
+      border: 1px solid #2a2a2a;
       border-radius: 16px;
-      background: rgba(17, 24, 38, 0.86);
+      background: rgba(17, 17, 17, 0.82);
       overflow: auto;
       padding: 18px;
       backdrop-filter: blur(6px);
@@ -216,7 +216,7 @@
     }
 
     .panel::-webkit-scrollbar-thumb {
-      background: #3b517c;
+      background: #3a3a3a;
       border-radius: 999px;
     }
 
@@ -229,12 +229,13 @@
       flex-wrap: wrap;
     }
 
+    /* CHANGED: dark grey translucent input style */
     .panel-search {
       width: 100%;
       max-width: 460px;
-      border: 1px solid #3c4457;
+      border: 1px solid #2f2f2f;
       border-radius: 999px;
-      background: #10141c;
+      background: rgba(20, 20, 20, 0.88);
       color: #fff;
       padding: 12px 16px;
       font-size: 0.95rem;
@@ -242,7 +243,7 @@
     }
 
     .panel-search:focus {
-      border-color: #6f7d99;
+      border-color: #5f5f5f;
     }
 
     .games-meta {
@@ -263,15 +264,16 @@
       padding-bottom: 14px;
     }
 
+    /* CHANGED: dark grey translucent cards */
     .game-card {
       position: relative;
       width: 100%;
       max-width: 280px;
       min-height: 290px;
       justify-self: center;
-      border: 1px solid var(--line);
+      border: 1px solid #2a2a2a;
       border-radius: 16px;
-      background: #0e1523;
+      background: rgba(18, 18, 18, 0.9);
       overflow: hidden;
       padding: 0;
       cursor: pointer;
@@ -298,7 +300,7 @@
       object-fit: cover;
       object-position: center;
       display: block;
-      background: #0b111d;
+      background: #111111;
     }
 
     .hot-badge {
