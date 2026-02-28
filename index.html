@@ -5,51 +5,256 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>nova</title>
   <style>
+    :root {
+      --bg: #0b0b0b;
+      --panel: rgba(17, 17, 17, 0.76);
+      --line: #2b2b2b;
+      --text: #ffffff;
+      --muted: #b8c2d1;
+      --cyan: #00ffff;
+      --cyan-dim: rgba(0, 255, 255, 0.16);
+    }
+
     * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
     }
 
-    :root {
-      --line: #2a2a2a;
-      --text: #ffffff;
-      --muted: #aeb9cf;
-      --blue: #5fafff;
-      --gaming-blue: #0056b3;
-      --light-blue: #00a2ff;
-      --bar-bg: rgba(10, 20, 35, 0.95);
-      --transition-speed: 0.4s;
-    }
-
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
       font-family: "Inter", "Segoe UI", sans-serif;
-      background: radial-gradient(circle at center, #0d1b2a 0%, #010409 100%);
       color: var(--text);
-      user-select: none;
+      background: radial-gradient(circle at center, #0d1b2a 0%, #010409 100%);
     }
 
     #bg-canvas {
       position: fixed;
       inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-      pointer-events: none;
       z-index: 0;
+      display: block;
     }
 
     .app {
       position: relative;
+      z-index: 1;
       width: 100%;
       height: 100%;
+    }
+
+    .content {
+      position: absolute;
+      inset: 0 70px 0 0;
+    }
+
+    .view {
+      position: absolute;
+      inset: 24px;
+      opacity: 0;
+      transform: translateY(16px) scale(0.992);
+      pointer-events: none;
+      transition: opacity 0.34s ease, transform 0.34s ease;
+    }
+
+    .view.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .home {
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .brand {
+      font-size: clamp(3rem, 9vw, 5.3rem);
+      letter-spacing: -3px;
+      text-transform: lowercase;
+      line-height: 1;
+      animation: homeIn 0.65s ease both;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-size: 1rem;
+      color: #f0f4ff;
+      opacity: 1;
+      transition: opacity 0.45s ease;
+      animation: homeIn 0.65s 0.08s ease both;
+      min-height: 1.35em;
+      padding: 0 12px;
+    }
+
+    .message.fade-out {
+      opacity: 0;
+    }
+
+    .panel {
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      overflow: auto;
+      padding: 18px;
+    }
+
+    .panel::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .panel::-webkit-scrollbar-thumb {
+      background: #363636;
+      border-radius: 999px;
+    }
+
+    .panel-tools {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+
+    .panel-search {
+      width: min(100%, 450px);
+      border: 1px solid #3a3a3a;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.42);
+      color: #fff;
+      padding: 12px 16px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .panel-search:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(0, 255, 255, 0.12);
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+      gap: 14px;
+      align-items: start;
+    }
+
+    .game-card {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 1px solid #2e2e2e;
+      border-radius: 14px;
+      overflow: hidden;
+      background: rgba(10, 10, 10, 0.84);
+      cursor: pointer;
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, opacity 0.25s ease;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .game-card.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .game-card:hover {
+      transform: scale(1.045);
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(0, 255, 255, 0.2);
+    }
+
+    .game-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      background: #0a0a0a;
+    }
+
+    .game-card .game-name {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      font-size: 0.78rem;
+      line-height: 1.15;
+      padding: 8px 9px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      text-align: left;
+    }
+
+    .hot-tag {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: #ff3d3d;
+      color: #fff;
+      border: 1px solid #ff7e7e;
+      border-radius: 999px;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 4px 8px;
       z-index: 2;
     }
 
+    .sound-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
+    }
+
+    .sound-btn {
+      min-height: 95px;
+      border: 1px solid #2f2f2f;
+      border-radius: 16px;
+      background: rgba(12, 12, 12, 0.7);
+      color: #fff;
+      padding: 14px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.12s ease, border-color 0.14s ease, box-shadow 0.14s ease, opacity 0.25s ease;
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    .sound-btn.in {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .sound-btn:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 0 14px rgba(0, 255, 255, 0.16);
+      transform: translateY(-2px);
+    }
+
+    .sound-btn:active {
+      transform: translateY(2px);
+    }
+
+    .sound-label {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.2;
+      font-size: 0.84rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 16px 8px;
+      font-size: 0.95rem;
+    }
+
+    /* Sidebar (your cyan style) */
     .selenite-sidebar {
       position: fixed;
       top: 0;
@@ -76,10 +281,10 @@
       align-items: center;
       border-radius: 12px;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       color: #666;
       background: transparent;
-      border: none;
+      border: 1px solid transparent;
+      transition: all 0.25s ease;
     }
 
     .nav-item svg {
@@ -94,10 +299,11 @@
 
     .nav-item:hover,
     .nav-item.active {
-      background-color: #00ffff;
+      background-color: var(--cyan);
       color: #000;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
       transform: scale(1.05);
+      border-color: rgba(255, 255, 255, 0.22);
     }
 
     .nav-item::after {
@@ -105,7 +311,7 @@
       position: absolute;
       right: 80px;
       background: #1a1a1a;
-      color: #00ffff;
+      color: var(--cyan);
       padding: 6px 12px;
       border-radius: 6px;
       font-size: 13px;
@@ -115,7 +321,7 @@
       pointer-events: none;
       opacity: 0;
       transform: translateX(15px);
-      transition: all 0.3s ease;
+      transition: all 0.25s ease;
     }
 
     .nav-item:hover::after {
@@ -123,285 +329,19 @@
       transform: translateX(0);
     }
 
-    .view {
-      display: none;
-      width: calc(100% - 70px);
-      height: 100%;
-      padding: 24px;
-      margin-right: 70px;
-    }
-
-    .view.active {
-      display: flex;
-      animation: viewIn 0.24s ease;
-    }
-
-    @keyframes viewIn {
-      from {
-        opacity: 0;
-        transform: translateY(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .home {
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-    }
-
-    .brand {
-      margin: 0;
-      font-size: clamp(3.2rem, 8vw, 5.2rem);
-      font-weight: 700;
-      letter-spacing: -3px;
-      text-transform: lowercase;
-      color: #ffffff;
-    }
-
-    .message {
-      margin: 6px 0 0;
-      color: #ffffff;
-      font-size: 1rem;
-      letter-spacing: -0.2px;
-    }
-
-    .home .brand,
-    .home .message {
-      opacity: 0;
-      transform: translateY(18px) scale(0.985);
-      filter: blur(8px);
-    }
-
-    .home.play .brand {
-      animation: homeReveal 0.62s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    .home.play .message {
-      animation: homeReveal 0.62s cubic-bezier(0.22, 1, 0.36, 1) 0.12s forwards;
-    }
-
-    @keyframes homeReveal {
-      from {
-        opacity: 0;
-        transform: translateY(18px) scale(0.985);
-        filter: blur(8px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-      }
-    }
-
-    /* CHANGED: dark grey translucent like sidebar */
-    .panel {
-      width: 100%;
-      height: 100%;
-      border: 1px solid #2a2a2a;
-      border-radius: 16px;
-      background: rgba(17, 17, 17, 0.82);
-      overflow: auto;
-      padding: 18px;
-      backdrop-filter: blur(6px);
-    }
-
-    .panel::-webkit-scrollbar {
-      width: 10px;
-    }
-
-    .panel::-webkit-scrollbar-thumb {
-      background: #3a3a3a;
-      border-radius: 999px;
-    }
-
-    .panel-tools {
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    /* CHANGED: dark grey translucent input style */
-    .panel-search {
-      width: 100%;
-      max-width: 460px;
-      border: 1px solid #2f2f2f;
-      border-radius: 999px;
-      background: rgba(20, 20, 20, 0.88);
-      color: #fff;
-      padding: 12px 16px;
-      font-size: 0.95rem;
-      outline: none;
-    }
-
-    .panel-search:focus {
-      border-color: #5f5f5f;
-    }
-
-    .games-meta {
-      width: 100%;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.86rem;
-      margin: 0;
-    }
-
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-      width: 100%;
-      max-width: 1320px;
-      margin: 0 auto;
-      padding-bottom: 14px;
-    }
-
-    /* CHANGED: dark grey translucent cards */
-    .game-card {
-      position: relative;
-      width: 100%;
-      max-width: 280px;
-      min-height: 290px;
-      justify-self: center;
-      border: 1px solid #2a2a2a;
-      border-radius: 16px;
-      background: rgba(18, 18, 18, 0.9);
-      overflow: hidden;
-      padding: 0;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      transform: translateY(8px) scale(0.985);
-      transition: opacity 0.25s ease, transform 0.25s ease, border-color 0.2s ease;
-    }
-
-    .game-card.in {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .game-card:hover {
-      border-color: var(--blue);
-      transform: translateY(0) scale(1.03);
-    }
-
-    .game-card img {
-      width: 100%;
-      height: 210px;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-      background: #111111;
-    }
-
-    .hot-badge {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      z-index: 3;
-      background: linear-gradient(135deg, #ff6a00, #ff2d55);
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      border-radius: 999px;
-      padding: 4px 9px;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      box-shadow: 0 6px 14px rgba(255, 85, 60, 0.45);
-    }
-
-    .game-name {
-      padding: 12px 12px 14px;
-      font-size: 1rem;
-      line-height: 1.25;
-      text-align: center;
-      color: #eaf2ff;
-      font-weight: 650;
-      flex: 1;
-      display: grid;
-      place-items: center;
-    }
-
-    .sound-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 14px;
-      justify-content: stretch;
-      padding-bottom: 16px;
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    .sound-btn {
-      width: 100%;
-      height: 118px;
-      border: none;
-      border-radius: 22px;
-      cursor: pointer;
-      color: #fff;
-      display: grid;
-      place-items: center;
-      padding: 10px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      opacity: 0;
-      transform: translateY(8px) scale(0.985);
-      transition: transform 0.12s ease, opacity 0.25s ease;
-    }
-
-    .sound-btn.in {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .sound-btn:active {
-      transform: translateY(4px);
-    }
-
-    .btn-label {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      text-align: center;
-      line-height: 1.1;
-      pointer-events: none;
-    }
-
+    /* Player overlay */
     #player-overlay {
       position: fixed;
       inset: 0;
       background: #000;
-      z-index: 100;
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: scale(1.015);
-      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0s linear 0.28s;
-    }
-
-    #player-overlay.open {
-      opacity: 1;
-      visibility: visible;
-      pointer-events: auto;
-      transform: scale(1);
-      transition: opacity 0.28s ease, transform 0.28s ease, visibility 0s linear 0s;
+      z-index: 1500;
+      display: none;
     }
 
     #game-frame {
       width: 100%;
       height: 100%;
-      border: none;
+      border: 0;
       background: #000;
     }
 
@@ -409,18 +349,15 @@
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
+      right: 70px;
       height: 60px;
-      background: var(--bar-bg);
-      border-bottom: 2px solid var(--gaming-blue);
+      background: rgba(0, 0, 0, 0.86);
+      border-bottom: 1px solid #222;
       display: flex;
       align-items: center;
-      padding: 0 20px;
-      box-sizing: border-box;
-      z-index: 1000;
-      transform: translateY(0);
-      transition: transform var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      padding: 0 16px;
+      z-index: 1600;
+      transition: transform 0.35s ease;
     }
 
     #top-bar.hidden {
@@ -429,50 +366,50 @@
 
     .icon-group {
       display: flex;
-      gap: 15px;
+      gap: 10px;
       align-items: center;
     }
 
     .icon-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid var(--light-blue);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid #2f2f2f;
       border-radius: 8px;
-      width: 56px;
-      height: 42px;
+      padding: 8px;
       cursor: pointer;
-      display: grid;
-      place-items: center;
-      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: #fff;
-      padding: 0;
-    }
-
-    .icon-btn svg {
-      width: 26px;
-      height: 26px;
-      fill: currentColor;
+      transition: all 0.2s ease;
     }
 
     .icon-btn:hover {
-      background: var(--gaming-blue);
-      transform: scale(1.05);
-      box-shadow: 0 0 10px var(--light-blue);
+      background: #151515;
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.22);
+      transform: scale(1.04);
+    }
+
+    .icon-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
     }
 
     #toggle-trigger {
       position: fixed;
       top: 60px;
       left: 20px;
-      background: var(--gaming-blue);
-      color: #fff;
-      border: none;
-      padding: 6px 16px;
+      background: #111;
+      color: white;
+      border: 1px solid #2a2a2a;
+      padding: 6px 14px;
       border-radius: 0 0 10px 10px;
       cursor: pointer;
       font-size: 12px;
-      font-weight: bold;
-      z-index: 999;
-      transition: transform var(--transition-speed) ease;
+      font-weight: 700;
+      z-index: 1601;
+      transition: transform 0.35s ease;
     }
 
     #top-bar.hidden + #toggle-trigger {
@@ -480,65 +417,50 @@
     }
 
     #game-status {
-      position: absolute;
+      position: fixed;
       inset: 0;
+      z-index: 1550;
       display: grid;
       place-items: center;
-      color: #c7d3eb;
+      color: #d4d8e0;
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 0.08em;
-      font-size: 0.72rem;
-      background: rgba(0, 0, 0, 0.55);
-      z-index: 950;
+      background: rgba(0, 0, 0, 0.45);
+      pointer-events: none;
       transition: opacity 0.2s ease;
     }
 
     #game-status.hide {
       opacity: 0;
-      pointer-events: none;
     }
 
-    @media (max-width: 900px) {
+    @keyframes homeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 700px) {
+      .content {
+        inset: 0 70px 0 0;
+      }
+
       .view {
-        width: calc(100% - 70px);
-        margin-right: 70px;
-        padding: 16px;
+        inset: 12px;
       }
 
       .game-grid {
-        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-        gap: 12px;
-      }
-
-      .game-card {
-        min-height: 240px;
-        max-width: none;
-      }
-
-      .game-card img {
-        height: 170px;
-      }
-
-      .icon-btn {
-        width: 52px;
-        height: 40px;
-      }
-    }
-
-    @media (max-width: 430px) {
-      .game-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
       }
 
       .sound-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .sound-btn {
-        height: 96px;
-        border-radius: 18px;
-        font-size: 0.78rem;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       }
     }
   </style>
@@ -547,93 +469,180 @@
   <canvas id="bg-canvas"></canvas>
 
   <div class="app">
+    <main class="content">
+      <section id="home-view" class="view home active">
+        <div>
+          <h1 class="brand">nova</h1>
+          <p class="message" id="home-message"></p>
+        </div>
+      </section>
+
+      <section id="games-view" class="view">
+        <div class="panel" id="games-panel">
+          <div class="panel-tools">
+            <input id="games-search" class="panel-search" type="text" placeholder="Search games..." />
+          </div>
+          <div class="game-grid" id="game-grid"></div>
+        </div>
+      </section>
+
+      <section id="sounds-view" class="view">
+        <div class="panel" id="sounds-panel">
+          <div class="panel-tools">
+            <input id="sounds-search" class="panel-search" type="text" placeholder="Search sounds..." />
+          </div>
+          <div class="sound-grid" id="sound-grid"></div>
+        </div>
+      </section>
+    </main>
+
     <aside class="selenite-sidebar">
       <button class="nav-item active" data-view="home" data-title="Home" aria-label="Home">
         <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
       </button>
-
       <button class="nav-item" data-view="games" data-title="Games" aria-label="Games">
         <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"></rect><path d="M6 12h4M8 10v4M15 11h.01M18 13h.01"></path></svg>
       </button>
-
       <button class="nav-item" data-view="sounds" data-title="Sounds" aria-label="Sounds">
         <svg viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
       </button>
     </aside>
-
-    <section id="home-view" class="view home active">
-      <h1 class="brand">nova</h1>
-      <p class="message">skyler, i know where you live</p>
-    </section>
-
-    <section id="games-view" class="view">
-      <div class="panel" id="games-panel">
-        <div class="panel-tools">
-          <input id="games-search" class="panel-search" type="text" placeholder="Loading games..." />
-          <p id="games-meta" class="games-meta"></p>
-        </div>
-        <div class="game-grid" id="game-grid"></div>
-      </div>
-    </section>
-
-    <section id="sounds-view" class="view">
-      <div class="panel" id="sounds-panel">
-        <div class="panel-tools">
-          <input id="sounds-search" class="panel-search" type="text" placeholder="Search sounds..." />
-        </div>
-        <div class="sound-grid" id="sound-grid"></div>
-      </div>
-    </section>
   </div>
 
   <div id="player-overlay">
     <div id="top-bar">
       <div class="icon-group">
-        <button class="icon-btn" id="back-home" title="Back" aria-label="Back">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+        <button class="icon-btn" id="back-btn" title="Back">
+          <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
         </button>
-        <button class="icon-btn" id="fullscreen-btn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        <button class="icon-btn" id="fullscreen-btn" title="Toggle Fullscreen">
+          <svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
         </button>
       </div>
     </div>
-
-    <button id="toggle-trigger" type="button">HIDE BAR</button>
-
+    <button id="toggle-trigger">HIDE BAR</button>
     <div id="game-status">loading...</div>
-    <iframe
-      id="game-frame"
-      allow="autoplay; fullscreen *; geolocation; microphone; camera; midi; monetization; xr-spatial-tracking; gamepad; gyroscope; accelerometer; xr; cross-origin-isolated; web-share"
-      allowfullscreen
-    ></iframe>
+    <iframe id="game-frame" allowfullscreen></iframe>
   </div>
 
   <script>
-    const data = {
-      games: [],
-      sounds: [{"id":1,"name":"FAHHHHHHHHHHHHHH","url":"https://www.myinstants.com/media/sounds/fahhhhhhhhhhhhhh.mp3","keyHint":""},{"id":2,"name":"VINE BOOM SOUND","url":"https://www.myinstants.com/media/sounds/vine-boom.mp3","keyHint":""},{"id":3,"name":"Fahhh","url":"https://www.myinstants.com/media/sounds/fahhh_KcgAXfs.mp3","keyHint":""},{"id":4,"name":"FAAAH","url":"https://www.myinstants.com/media/sounds/faaah.mp3","keyHint":""},{"id":5,"name":"rizz sound effect","url":"https://www.myinstants.com/media/sounds/rizz-sound-effect.mp3","keyHint":""},{"id":6,"name":"Fart","url":"https://www.myinstants.com/media/sounds/dry-fart.mp3","keyHint":""},{"id":7,"name":"YOURE PHONE IS RINGING","url":"https://www.myinstants.com/media/sounds/youre-phone-is-ringing.mp3","keyHint":""},{"id":8,"name":"Among Us role reveal sound","url":"https://www.myinstants.com/media/sounds/among-us-role-reveal-sound.mp3","keyHint":""},{"id":9,"name":"Chicken on tree screaming","url":"https://www.myinstants.com/media/sounds/chicken-on-tree-screaming.mp3","keyHint":""},{"id":10,"name":"Anime Wow","url":"https://www.myinstants.com/media/sounds/anime-wow-sound-effect.mp3","keyHint":""},{"id":11,"name":"Hub Intro Sound","url":"https://www.myinstants.com/media/sounds/hub-intro-sound.mp3","keyHint":""},{"id":12,"name":"Dexter meme","url":"https://www.myinstants.com/media/sounds/dexter-meme.mp3","keyHint":""},{"id":13,"name":"oi oi oe oi a eye eye","url":"https://www.myinstants.com/media/sounds/oi-oi-oe-oi-a-eye-eye.mp3","keyHint":""},{"id":14,"name":"SpongeBob Fail","url":"https://www.myinstants.com/media/sounds/spongebob-fail.mp3","keyHint":""},{"id":15,"name":"Apple Pay","url":"https://www.myinstants.com/media/sounds/applepay.mp3","keyHint":""},{"id":16,"name":"indian song","url":"https://www.myinstants.com/media/sounds/indian-song.mp3","keyHint":""},{"id":17,"name":"BRUH","url":"https://www.myinstants.com/media/sounds/movie_1.mp3","keyHint":""},{"id":18,"name":"dun dun dunnnnnnnn","url":"https://www.myinstants.com/media/sounds/dun-dun-dun-sound-effect-brass_8nFBccR.mp3","keyHint":""},{"id":19,"name":"rip my granny she got hit by a bazooka","url":"https://www.myinstants.com/media/sounds/rip-my-granny-she-got-hit-by-a-bazooka.mp3","keyHint":""},{"id":20,"name":"gey echo","url":"https://www.myinstants.com/media/sounds/gey-echo.mp3","keyHint":""},{"id":21,"name":"Smoke Detector Beep","url":"https://www.myinstants.com/media/sounds/smoke-detector-beep.mp3","keyHint":""},{"id":22,"name":"yes!(lara voice)","url":"https://www.myinstants.com/media/sounds/yes-lara-voice.mp3","keyHint":""},{"id":23,"name":"Bone Crack","url":"https://www.myinstants.com/media/sounds/bone-crack.mp3","keyHint":""},{"id":24,"name":"romanceeeeeeeeeeeeee","url":"https://www.myinstants.com/media/sounds/romanceeeeeeeeeeeeee.mp3","keyHint":""},{"id":25,"name":"The Undertaker Bell","url":"https://www.myinstants.com/media/sounds/undertakers-bell_2UwFCIe.mp3","keyHint":""},{"id":26,"name":"We are charlie kirk loud asf","url":"https://www.myinstants.com/media/sounds/we-are-charlie-kirk-loud-asf.mp3","keyHint":""},{"id":27,"name":"Tuco: GET OUT","url":"https://www.myinstants.com/media/sounds/tuco-get-out.mp3","keyHint":""},{"id":28,"name":"ACK","url":"https://www.myinstants.com/media/sounds/ack.mp3","keyHint":""},{"id":29,"name":"Daddyy Chill","url":"https://www.myinstants.com/media/sounds/daddyy-chill.mp3","keyHint":""},{"id":30,"name":"Fart Button","url":"https://www.myinstants.com/media/sounds/perfect-fart.mp3","keyHint":""},{"id":31,"name":"FAHHHHHHHHHHHHHHH","url":"https://www.myinstants.com/media/sounds/fahhhhhhhhhhhhhhh.mp3","keyHint":""},{"id":32,"name":"WHAT IS THIS DIDDY BLUD DOING ON THE","url":"https://www.myinstants.com/media/sounds/what-is-this-diddy-blud-doing-on-the.mp3","keyHint":""},{"id":33,"name":"Sad Violin (the meme one)","url":"https://www.myinstants.com/media/sounds/tf_nemesis.mp3","keyHint":""},{"id":34,"name":"Galaxy meme","url":"https://www.myinstants.com/media/sounds/galaxy-meme.mp3","keyHint":""},{"id":35,"name":"Taco Bell Bong","url":"https://www.myinstants.com/media/sounds/taco-bell-bong-sfx.mp3","keyHint":""},{"id":36,"name":"Metal pipe clang","url":"https://www.myinstants.com/media/sounds/metal-pipe-clang.mp3","keyHint":""},{"id":37,"name":"BALD BALD BALD","url":"https://www.myinstants.com/media/sounds/bald-bald-bald_0ClL6ac.mp3","keyHint":""},{"id":38,"name":"nuclear fart dante","url":"https://www.myinstants.com/media/sounds/nuclear-fart-dante.mp3","keyHint":""},{"id":39,"name":"LEONARDOLIMALIVE \\u002D A ESPADA","url":"https://www.myinstants.com/media/sounds/leonardolimalive-a-espada.mp3","keyHint":""},{"id":40,"name":"Prowler Full Sfx","url":"https://www.myinstants.com/media/sounds/prowler-full-sfx_6mfZLPl.mp3","keyHint":""},{"id":41,"name":"Touhouspeed","url":"https://www.myinstants.com/media/sounds/touhouspeed.mp3","keyHint":""},{"id":42,"name":"door creak 8","url":"https://www.myinstants.com/media/sounds/door-creak-8.mp3","keyHint":""},{"id":43,"name":"6 Electro shock glitch","url":"https://www.myinstants.com/media/sounds/6-electro-shock-glitch.mp3","keyHint":""},{"id":44,"name":"Am i awake","url":"https://www.myinstants.com/media/sounds/am-i-awake.mp3","keyHint":""},{"id":45,"name":"3 Bird chirp","url":"https://www.myinstants.com/media/sounds/3-bird-chirp.mp3","keyHint":""},{"id":46,"name":"Please mommy","url":"https://www.myinstants.com/media/sounds/please-mommy.mp3","keyHint":""},{"id":47,"name":"The club is dangerous","url":"https://www.myinstants.com/media/sounds/the-club-is-dangerous.mp3","keyHint":""},{"id":48,"name":"I smell it","url":"https://www.myinstants.com/media/sounds/i-smell-it.mp3","keyHint":""},{"id":49,"name":"Sky high","url":"https://www.myinstants.com/media/sounds/sky-high.mp3","keyHint":""},{"id":50,"name":"Do you always","url":"https://www.myinstants.com/media/sounds/do-you-always.mp3","keyHint":""},{"id":51,"name":"Well I\\u0027ll be","url":"https://www.myinstants.com/media/sounds/well-ill-be.mp3","keyHint":""},{"id":52,"name":"5 Mouse Squeak","url":"https://www.myinstants.com/media/sounds/5-mouse-squeak.mp3","keyHint":""},{"id":53,"name":"Boner in the ocean","url":"https://www.myinstants.com/media/sounds/boner-in-the-ocean.mp3","keyHint":""},{"id":54,"name":"Send help big boy","url":"https://www.myinstants.com/media/sounds/send-help-big-boy.mp3","keyHint":""},{"id":55,"name":"4 Lightning","url":"https://www.myinstants.com/media/sounds/4-lightning.mp3","keyHint":""},{"id":56,"name":"99% issues","url":"https://www.myinstants.com/media/sounds/99-issues.mp3","keyHint":""},{"id":57,"name":"3 Chair Spike","url":"https://www.myinstants.com/media/sounds/3-chair-spike.mp3","keyHint":""},{"id":58,"name":"قفغعغفقع657غفعه","url":"https://www.myinstants.com/media/sounds/qfg-gfq-657gf-h.mp3","keyHint":""},{"id":59,"name":"2 Mouse Squeak","url":"https://www.myinstants.com/media/sounds/2-mouse-squeak.mp3","keyHint":""},{"id":60,"name":"Grandad skin","url":"https://www.myinstants.com/media/sounds/grandad-skin.mp3","keyHint":""},{"id":61,"name":"1 Explosion Blast","url":"https://www.myinstants.com/media/sounds/1-explosion-blast.mp3","keyHint":""},{"id":62,"name":"Not pg 13","url":"https://www.myinstants.com/media/sounds/not-pg-13.mp3","keyHint":""},{"id":63,"name":"Up in the air","url":"https://www.myinstants.com/media/sounds/up-in-the-air.mp3","keyHint":""},{"id":64,"name":"I was under pressure","url":"https://www.myinstants.com/media/sounds/i-was-under-pressure.mp3","keyHint":""},{"id":65,"name":"Look at this guy lol","url":"https://www.myinstants.com/media/sounds/look-at-this-guy-lol.mp3","keyHint":""},{"id":66,"name":"He got it","url":"https://www.myinstants.com/media/sounds/he-got-it.mp3","keyHint":""},{"id":67,"name":"Botón de respuesta","url":"https://www.myinstants.com/media/sounds/boton-de-respuesta.mp3","keyHint":""},{"id":68,"name":"Pikachu Old Cry","url":"https://www.myinstants.com/media/sounds/pikachu-old-cry.mp3","keyHint":""},{"id":69,"name":"Balltube.exe llorando 01","url":"https://www.myinstants.com/media/sounds/balltube-exe-llorando-01.mp3","keyHint":""},{"id":70,"name":"It\\u0027s official","url":"https://www.myinstants.com/media/sounds/its-official.mp3","keyHint":""},{"id":71,"name":"Belas Palavras","url":"https://www.myinstants.com/media/sounds/belas-palavras.mp3","keyHint":""},{"id":72,"name":"Applausing","url":"https://www.myinstants.com/media/sounds/applausing.mp3","keyHint":""},{"id":73,"name":"Buzzer","url":"https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3","keyHint":""},{"id":74,"name":"Discord Notification","url":"https://www.myinstants.com/media/sounds/discord-notification.mp3","keyHint":""},{"id":75,"name":"MLG AIR HORN!!!!!!!!!!!","url":"https://www.myinstants.com/media/sounds/mlg-airhorn.mp3","keyHint":""},{"id":76,"name":"ROBLOX oof","url":"https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3","keyHint":""},{"id":77,"name":"fart with reverb","url":"https://www.myinstants.com/media/sounds/fart-with-reverb.mp3","keyHint":""},{"id":78,"name":"The Nut Button","url":"https://www.myinstants.com/media/sounds/nut_ZKo5FA9.mp3","keyHint":""},{"id":79,"name":"Censor Beep 1","url":"https://www.myinstants.com/media/sounds/censor-beep-1.mp3","keyHint":""},{"id":80,"name":"Emotional Damage Meme","url":"https://www.myinstants.com/media/sounds/emotional-damage-meme.mp3","keyHint":""},{"id":81,"name":"Death sound (Fortnite)","url":"https://www.myinstants.com/media/sounds/tmp_7901-951678082.mp3","keyHint":""},{"id":82,"name":"ding sound effect","url":"https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3","keyHint":""},{"id":83,"name":"Windows XP Error","url":"https://www.myinstants.com/media/sounds/erro.mp3","keyHint":""},{"id":84,"name":"Metal Gear Solid Alert","url":"https://www.myinstants.com/media/sounds/tindeck_1.mp3","keyHint":""},{"id":85,"name":"The Price is Right Losing Horn","url":"https://www.myinstants.com/media/sounds/the-price-is-right-losing-horn.mp3","keyHint":""},{"id":86,"name":"Error SOUNDSS","url":"https://www.myinstants.com/media/sounds/error_CDOxCYm.mp3","keyHint":""},{"id":87,"name":"Door Knocking SOUND EFFECT","url":"https://www.myinstants.com/media/sounds/crazy-realistic-knocking-sound-troll-twitch-streamers_small.mp3","keyHint":""},{"id":88,"name":"Shut up!","url":"https://www.myinstants.com/media/sounds/shutup.swf.mp3","keyHint":""},{"id":89,"name":"Prowler Sound Effect","url":"https://www.myinstants.com/media/sounds/prowler-sound-effect_6bXErot.mp3","keyHint":""},{"id":90,"name":"Fart Meme Sound","url":"https://www.myinstants.com/media/sounds/fart-meme-sound.mp3","keyHint":""},{"id":91,"name":"DJ Airhorn","url":"https://www.myinstants.com/media/sounds/dj-airhorn-sound-effect-kingbeatz_1.mp3","keyHint":""},{"id":92,"name":"what da dog doin","url":"https://www.myinstants.com/media/sounds/yt1s_wU4BGgD.mp3","keyHint":""},{"id":93,"name":"anime ahh","url":"https://www.myinstants.com/media/sounds/anime-ahh.mp3","keyHint":""},{"id":94,"name":"Meme final","url":"https://www.myinstants.com/media/sounds/meme-de-creditos-finales.mp3","keyHint":""},{"id":95,"name":"Mambo曼波 诗歌剧Matikanetannhauser","url":"https://www.myinstants.com/media/sounds/mamboman-bo-shi-ge-ju-matikanetannhauser.mp3","keyHint":""},{"id":96,"name":"spongebob boowomp","url":"https://www.myinstants.com/media/sounds/spongebob-boowomp.mp3","keyHint":""},{"id":97,"name":"Awkward Moment","url":"https://www.myinstants.com/media/sounds/awkward-moment.mp3","keyHint":""},{"id":98,"name":"Re:Zero Return by Death","url":"https://www.myinstants.com/media/sounds/re-zero-return-by-death.mp3","keyHint":""},{"id":99,"name":"Cartoon run take off","url":"https://www.myinstants.com/media/sounds/take-off_2YqCEjc.mp3","keyHint":""},{"id":100,"name":"Mambo (Matikanetannhauser)","url":"https://www.myinstants.com/media/sounds/mambo-matikanetannhauser.mp3","keyHint":""},{"id":101,"name":"Dolphin Censor","url":"https://www.myinstants.com/media/sounds/spongebob-dolphin-censor.mp3","keyHint":""},{"id":102,"name":"sus anime sound","url":"https://www.myinstants.com/media/sounds/sus-anime-sound.mp3","keyHint":""},{"id":103,"name":"eh?eh?ehhhh?","url":"https://www.myinstants.com/media/sounds/eh-eh-ehhhh.mp3","keyHint":""},{"id":104,"name":"I\\u0027m Very Angry goku","url":"https://www.myinstants.com/media/sounds/im-very-angry-goku.mp3","keyHint":""},{"id":105,"name":"you\\u0027ve got mail","url":"https://www.myinstants.com/media/sounds/yougotmail.mp3","keyHint":""},{"id":106,"name":"Uwu hannah","url":"https://www.myinstants.com/media/sounds/uwu-hannah.mp3","keyHint":""},{"id":107,"name":"uwu discord gorl","url":"https://www.myinstants.com/media/sounds/uwu-discord-gorl.mp3","keyHint":""},{"id":108,"name":"FNAF Balloon Boy Hello","url":"https://www.myinstants.com/media/sounds/echo3b.mp3","keyHint":""},{"id":109,"name":"Sonic.exe scream","url":"https://www.myinstants.com/media/sounds/sonic-exe-scream.mp3","keyHint":""},{"id":110,"name":"can i put my balls in your jaws","url":"https://www.myinstants.com/media/sounds/can-i-put-my-balls-in-your-jaws.mp3","keyHint":""},{"id":111,"name":"NFL Draft Chime","url":"https://www.myinstants.com/media/sounds/nfl-draft-chime.mp3","keyHint":""},{"id":112,"name":"To be Continued (jojo)","url":"https://www.myinstants.com/media/sounds/untitled_1071.mp3","keyHint":""},{"id":113,"name":"Thank You For Your Patronage","url":"https://www.myinstants.com/media/sounds/thank-you-for-your-patronage.mp3","keyHint":""},{"id":114,"name":"\\u0022Ah\\u0022 Cute Anime Voice Sound Effect","url":"https://www.myinstants.com/media/sounds/ah-cute-anime-voice-sound-effect.mp3","keyHint":""},{"id":115,"name":"人の心とかないんか?","url":"https://www.myinstants.com/media/sounds/ren-noxin-tokanainka_JVPTSaf.mp3","keyHint":""},{"id":116,"name":"Spongebob disappointed","url":"https://www.myinstants.com/media/sounds/spongebob-disappointed-sound-effect.mp3","keyHint":""},{"id":117,"name":"BOING . MP3","url":"https://www.myinstants.com/media/sounds/boing_lmke36X.mp3","keyHint":""},{"id":118,"name":"Tuturu","url":"https://www.myinstants.com/media/sounds/tuturu_1.mp3","keyHint":""},{"id":119,"name":"WOW! (Happy \\u002D Fairy Tail)","url":"https://www.myinstants.com/media/sounds/wow_2.mp3","keyHint":""},{"id":120,"name":"Deltarune Explosion","url":"https://www.myinstants.com/media/sounds/deltarune-explosion.mp3","keyHint":""},{"id":121,"name":"bing chilling","url":"https://www.myinstants.com/media/sounds/bing-chilling_fcdGgUc.mp3","keyHint":""},{"id":122,"name":"Zelda chest opening","url":"https://www.myinstants.com/media/sounds/zelda-chest-opening-and-item-catch.mp3","keyHint":""},{"id":123,"name":"Yamate Kudesai","url":"https://www.myinstants.com/media/sounds/yamate-kudesai.mp3","keyHint":""},{"id":124,"name":"Minecraft Explosions","url":"https://www.myinstants.com/media/sounds/minecraft-explosion-green-screen.mp3","keyHint":""},{"id":125,"name":"Por fin apareciste Malnacido \\u002DPicoro\\u002D","url":"https://www.myinstants.com/media/sounds/por-fin-apareciste-malnacido-picoro.mp3","keyHint":""},{"id":126,"name":"Screaming Sheep","url":"https://www.myinstants.com/media/sounds/01-the-screaming-sheep.mp3","keyHint":""},{"id":127,"name":"shine sound","url":"https://www.myinstants.com/media/sounds/anime-shine-sound-effect_QP4mAaX.mp3","keyHint":""},{"id":128,"name":"Fears to Fathom Notification Sound","url":"https://www.myinstants.com/media/sounds/fears-to-fathom-notification-sound.mp3","keyHint":""},{"id":129,"name":"Jeopardy Theme Song!","url":"https://www.myinstants.com/media/sounds/jeopardy-themelq.mp3","keyHint":""},{"id":130,"name":"MICHAEL DONT LEAVE ME HERE","url":"https://www.myinstants.com/media/sounds/michael-dont-leave-me-here.mp3","keyHint":""},{"id":131,"name":"Wrong Answer Buzzer","url":"https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3","keyHint":""},{"id":132,"name":"FNAF Jumpscare Scream","url":"https://www.myinstants.com/media/sounds/five-nights-at-freddys-full-scream-sound_2.mp3","keyHint":""},{"id":133,"name":"Pop SFX","url":"https://www.myinstants.com/media/sounds/pop_7e9Is8L.mp3","keyHint":""},{"id":134,"name":"fahhh pump sound","url":"https://www.myinstants.com/media/sounds/fahhh-pump-sound.mp3","keyHint":""},{"id":135,"name":"Careless Whisper","url":"https://www.myinstants.com/media/sounds/careless_whispers.mp3","keyHint":""},{"id":136,"name":"danger alarm sound effect meme","url":"https://www.myinstants.com/media/sounds/danger-alarm-sound-effect-meme.mp3","keyHint":""},{"id":137,"name":"wet fart","url":"https://www.myinstants.com/media/sounds/wet-fart_1.mp3","keyHint":""},{"id":138,"name":"nope","url":"https://www.myinstants.com/media/sounds/engineer_no01_1.mp3","keyHint":""},{"id":139,"name":"TheBurntPeanut Hooray","url":"https://www.myinstants.com/media/sounds/theburntpeanut-hooray.mp3","keyHint":""},{"id":140,"name":"Fnaf 1 music box","url":"https://www.myinstants.com/media/sounds/fnaf-1-music-box.mp3","keyHint":""},{"id":141,"name":"Coin Mario","url":"https://www.myinstants.com/media/sounds/super-mario-coin-sound.mp3","keyHint":""},{"id":142,"name":"RICK ROLLED!!!! BWHAHAHAHAHAHA","url":"https://www.myinstants.com/media/sounds/epic.mp3","keyHint":""},{"id":143,"name":"French meme song","url":"https://www.myinstants.com/media/sounds/french-meme-song.mp3","keyHint":""},{"id":144,"name":"Doge bonk","url":"https://www.myinstants.com/media/sounds/bonk_BEtiM8g.mp3","keyHint":""},{"id":145,"name":"RDR2 low honour sound","url":"https://www.myinstants.com/media/sounds/rdr2-low-honour-sound.mp3","keyHint":""},{"id":146,"name":"Animal Crossing Isabelle Voice","url":"https://www.myinstants.com/media/sounds/animal-crossing-isabelle-voice-clips-no-background-music-youtubemp3free.mp3","keyHint":""},{"id":147,"name":"Gta v notification","url":"https://www.myinstants.com/media/sounds/gta-v-notification.mp3","keyHint":""},{"id":148,"name":"Electric Zoo","url":"https://www.myinstants.com/media/sounds/spongebob-squarepants-the-yellow-album-21-electric-zoo-audiotrimmer.mp3","keyHint":""},{"id":149,"name":"Evolution Mega Knight","url":"https://www.myinstants.com/media/sounds/evolution-mega-knight.mp3","keyHint":""},{"id":150,"name":"Nuclear Fart","url":"https://www.myinstants.com/media/sounds/nuclear-fart-1.mp3","keyHint":""},{"id":151,"name":"Final Jeopardy Thinking Music","url":"https://www.myinstants.com/media/sounds/jeopardy-final-jeopardy-thinking-music.mp3","keyHint":""},{"id":152,"name":"Strawberry elephant spawn troll steal a brainrot","url":"https://www.myinstants.com/media/sounds/strawberry-elephant-spawn-troll-steal-a-brainrot.mp3","keyHint":""},{"id":153,"name":"Burnt Peanut Little Bit of Goop 2","url":"https://www.myinstants.com/media/sounds/burnt-peanut-little-bit-of-goop-2.mp3","keyHint":""},{"id":154,"name":"angry roblox","url":"https://www.myinstants.com/media/sounds/angry-roblox.mp3","keyHint":""},{"id":155,"name":"Family Feud YES Ding","url":"https://www.myinstants.com/media/sounds/family-feud-good-answer.mp3","keyHint":""},{"id":156,"name":"Burnt peanut hell yeah","url":"https://www.myinstants.com/media/sounds/burnt-peanut-hell-yeah.mp3","keyHint":""},{"id":157,"name":"AMOGUS SCREAMING","url":"https://www.myinstants.com/media/sounds/guy-yelling-among-us-sound-effect.mp3","keyHint":""},{"id":158,"name":"Drum Roll Sound Effect","url":"https://www.myinstants.com/media/sounds/drum-roll-gaming-sound-effect-hd.mp3","keyHint":""},{"id":159,"name":"two hours later","url":"https://www.myinstants.com/media/sounds/spongebob-two-hours-later-2019-download-link.mp3","keyHint":""},{"id":160,"name":"Super Mario Beedoo","url":"https://www.myinstants.com/media/sounds/super-mario-beedoo_F3cwLoe.mp3","keyHint":""},{"id":161,"name":"Minecraft XP Sound","url":"https://www.myinstants.com/media/sounds/orb.mp3","keyHint":""},{"id":162,"name":"sad meow song","url":"https://www.myinstants.com/media/sounds/sad-meow-song.mp3","keyHint":""},{"id":163,"name":"67","url":"https://www.myinstants.com/media/sounds/67_SQlv2Xv.mp3","keyHint":""},{"id":164,"name":"baby laughing meme","url":"https://www.myinstants.com/media/sounds/baby-laughing-meme.mp3","keyHint":""},{"id":165,"name":"oh my god bro oh hell nah man","url":"https://www.myinstants.com/media/sounds/oh-my-god-bro-oh-hell-nah-man.mp3","keyHint":""},{"id":166,"name":"LIZARD BUTTON","url":"https://www.myinstants.com/media/sounds/lizard-button.mp3","keyHint":""},{"id":167,"name":"Long brain fart","url":"https://www.myinstants.com/media/sounds/long-brain-fart.mp3","keyHint":""},{"id":168,"name":"YAAAAAAAAY","url":"https://www.myinstants.com/media/sounds/kids-saying-yay-sound-effect_3.mp3","keyHint":""},{"id":169,"name":"Goo goo gagaaa","url":"https://www.myinstants.com/media/sounds/goo-goo-gagaaa.mp3","keyHint":""},{"id":170,"name":"cat laugh meme 1","url":"https://www.myinstants.com/media/sounds/cat-laugh-meme-1.mp3","keyHint":""},{"id":171,"name":"M e o w ~","url":"https://www.myinstants.com/media/sounds/m-e-o-w.mp3","keyHint":""},{"id":172,"name":"my mommy said no more skibidi toilet","url":"https://www.myinstants.com/media/sounds/my-mommy-said-no-more-skibidi-toilet.mp3","keyHint":""},{"id":173,"name":"GunShottttt","url":"https://www.myinstants.com/media/sounds/gunshotjbudden.mp3","keyHint":""},{"id":174,"name":"RUN vine","url":"https://www.myinstants.com/media/sounds/run-vine-sound-effect.mp3","keyHint":""},{"id":175,"name":"Стон","url":"https://www.myinstants.com/media/sounds/ston_NZIzS9V.mp3","keyHint":""},{"id":176,"name":"oi, oi oe oi a eye eye","url":"https://www.myinstants.com/media/sounds/oi-oi-oe-oi-a-eye-eye_tUunIyy.mp3","keyHint":""},{"id":177,"name":"goku drip","url":"https://www.myinstants.com/media/sounds/drip-goku-meme-song-original-dragon-ball-super-music-clash-of-gods-in-description.mp3","keyHint":""},{"id":178,"name":"lack of a father figure?","url":"https://www.myinstants.com/media/sounds/lack-of-a-father-figure.mp3","keyHint":""},{"id":179,"name":"°__°","url":"https://www.myinstants.com/media/sounds/deg-deg_4M6Cojn.mp3","keyHint":""},{"id":180,"name":"Oh My God Meme","url":"https://www.myinstants.com/media/sounds/oh-my-god-meme.mp3","keyHint":""},{"id":181,"name":"Вы позвонили царю батюшке","url":"https://www.myinstants.com/media/sounds/vy-pozvonili-tsariu-batiushke.mp3","keyHint":""},{"id":182,"name":"gah dayum","url":"https://www.myinstants.com/media/sounds/gah-dayum.mp3","keyHint":""},{"id":183,"name":"She gonna call me baby boo","url":"https://www.myinstants.com/media/sounds/she-gonna-call-me-baby-boo.mp3","keyHint":""},{"id":184,"name":"Гудок поезда","url":"https://www.myinstants.com/media/sounds/gudok-poezda.mp3","keyHint":""},{"id":185,"name":"Meme","url":"https://www.myinstants.com/media/sounds/are-you-out-of-your-mind-greenscreen-change-quality-and-end-wont-cut-off_2.mp3","keyHint":""},{"id":186,"name":"City Boy","url":"https://www.myinstants.com/media/sounds/city-boy.mp3","keyHint":""},{"id":187,"name":"Визг свиньи","url":"https://www.myinstants.com/media/sounds/vizg-svini.mp3","keyHint":""},{"id":188,"name":"*Snore* mimimimimimi","url":"https://www.myinstants.com/media/sounds/snore-mimimimimimi.mp3","keyHint":""},{"id":189,"name":"\\u0027What\\u0027 Bottom Text Meme (Sanctuary Guardian) \\u002D S","url":"https://www.myinstants.com/media/sounds/what-bottom-text-meme-sanctuary-guardian-sound-effect-hd.mp3","keyHint":""},{"id":190,"name":"It was at this moment he knew","url":"https://www.myinstants.com/media/sounds/heknew.mp3","keyHint":""},{"id":191,"name":"Дядя Саша","url":"https://www.myinstants.com/media/sounds/diadia-sasha_K0Xb9eR.mp3","keyHint":""},{"id":192,"name":"Clapping","url":"https://www.myinstants.com/media/sounds/aplausos_2.mp3","keyHint":""},{"id":193,"name":"Surprise mother f\\u0027er","url":"https://www.myinstants.com/media/sounds/surprise-mother-fer.mp3","keyHint":""},{"id":194,"name":"Bruh meme","url":"https://www.myinstants.com/media/sounds/movie_1_C2K5NH0.mp3","keyHint":""},{"id":195,"name":"bass drop sound effect","url":"https://www.myinstants.com/media/sounds/bass-drop-edit_mixdown.mp3","keyHint":""},{"id":196,"name":"John Cena entrance","url":"https://www.myinstants.com/media/sounds/cena.mp3","keyHint":""},{"id":197,"name":"Yep That\\u0027s me you...","url":"https://www.myinstants.com/media/sounds/original-yep-thats-me-youre-probably-wondering_vRBcfjS.mp3","keyHint":""},{"id":198,"name":"discord join call","url":"https://www.myinstants.com/media/sounds/yt1s_nYWSz5R.mp3","keyHint":""},{"id":199,"name":"ДИМОН","url":"https://www.myinstants.com/media/sounds/pro-metei-dimon-www.mp3","keyHint":""},{"id":200,"name":"SPONGEBOB A FEW MOMENTS LATER","url":"https://www.myinstants.com/media/sounds/a-few-moments-later-hd.mp3","keyHint":""},{"id":201,"name":"Here Comes The Money","url":"https://www.myinstants.com/media/sounds/money_2.mp3","keyHint":""},{"id":202,"name":"Reload Gun","url":"https://www.myinstants.com/media/sounds/gunreload.mp3","keyHint":""},{"id":203,"name":"Fnaf 2 Hallway","url":"https://www.myinstants.com/media/sounds/hallway-ambiance-extended-five-nights-at-freddys-2-music.mp3","keyHint":""},{"id":204,"name":"Windows XP \\u002D Startup Sound","url":"https://www.myinstants.com/media/sounds/windows-xp-startup.mp3","keyHint":""},{"id":205,"name":"FAIL SOUND MEME","url":"https://www.myinstants.com/media/sounds/fail-sound-effect.mp3","keyHint":""},{"id":206,"name":"DAMN SON, WHERE\\u0027D YA FIND THIS","url":"https://www.myinstants.com/media/sounds/damn-son-whered-you-find-this.mp3","keyHint":""},{"id":207,"name":"Transformers (transforming)","url":"https://www.myinstants.com/media/sounds/transforming-sound-from-the-transformers.mp3","keyHint":""},{"id":208,"name":"JAWS THEME","url":"https://www.myinstants.com/media/sounds/jaws-theme_TDORPKA.mp3","keyHint":""},{"id":209,"name":"20th Century Fox Fanfare","url":"https://www.myinstants.com/media/sounds/20th-century-fox-fanfare.mp3","keyHint":""},{"id":210,"name":"scout scream","url":"https://www.myinstants.com/media/sounds/screaming-scout.mp3","keyHint":""},{"id":211,"name":"TV Static","url":"https://www.myinstants.com/media/sounds/tv-static-01.mp3","keyHint":""},{"id":212,"name":"Darth Vader NOOOOOOOOO!","url":"https://www.myinstants.com/media/sounds/nooo.mp3","keyHint":""},{"id":213,"name":"Knocked Player Fortnite","url":"https://www.myinstants.com/media/sounds/ui-negative-alert.mp3","keyHint":""},{"id":214,"name":"im in danger","url":"https://www.myinstants.com/media/sounds/fma6waln.mp3","keyHint":""},{"id":215,"name":"Screech Car Crash","url":"https://www.myinstants.com/media/sounds/237375__squareal__car-crash.mp3","keyHint":""},{"id":216,"name":"Grindr Sound","url":"https://www.myinstants.com/media/sounds/grindr-notification-sound.mp3","keyHint":""},{"id":217,"name":"Dune Scream","url":"https://www.myinstants.com/media/sounds/dune-scream.mp3","keyHint":""},{"id":218,"name":"austin powers yeah babay","url":"https://www.myinstants.com/media/sounds/austin-powers-yeah-babay.mp3","keyHint":""},{"id":219,"name":"Homer Simpson Scream","url":"https://www.myinstants.com/media/sounds/tmp90lreogl.mp3","keyHint":""},{"id":220,"name":"Darth Vader Theme","url":"https://www.myinstants.com/media/sounds/darth-vader-theme.mp3","keyHint":""},{"id":221,"name":"Dark Souls \\u002D Pain","url":"https://www.myinstants.com/media/sounds/voice-mx-damage-m-1.mp3","keyHint":""},{"id":222,"name":"Prowler Intense","url":"https://www.myinstants.com/media/sounds/prowler-intense.mp3","keyHint":""},{"id":223,"name":"Crow Sound Caw","url":"https://www.myinstants.com/media/sounds/raven-caw-caw.mp3","keyHint":""},{"id":224,"name":"We are Charlie Kirk (song)","url":"https://www.myinstants.com/media/sounds/we-are-charlie-kirk-song.mp3","keyHint":""},{"id":225,"name":"Correct Answer GameShow","url":"https://www.myinstants.com/media/sounds/correct.mp3","keyHint":""},{"id":226,"name":"HAha funny laugh","url":"https://www.myinstants.com/media/sounds/ny-video-online-audio-converter.mp3","keyHint":""},{"id":227,"name":"Free Bird Solo","url":"https://www.myinstants.com/media/sounds/free-bird-solo.mp3","keyHint":""},{"id":228,"name":"SUBWAY SURFERS BASS BOOSTED","url":"https://www.myinstants.com/media/sounds/subway-surfers-bass-boosted.mp3","keyHint":""},{"id":229,"name":"Крутая музыка","url":"https://www.myinstants.com/media/sounds/krutaia-muzyka.mp3","keyHint":""},{"id":230,"name":"Directed by Robert B Weide","url":"https://www.myinstants.com/media/sounds/directed-by-robert-b_voI2Z4T.mp3","keyHint":""},{"id":231,"name":"Тёмная ночь","url":"https://www.myinstants.com/media/sounds/tiomnaia-noch.mp3","keyHint":""},{"id":232,"name":"NFL Bass Boosted","url":"https://www.myinstants.com/media/sounds/nfl.mp3","keyHint":""},{"id":233,"name":"Mii Channel Music","url":"https://www.myinstants.com/media/sounds/mii-channel-music.mp3","keyHint":""},{"id":234,"name":"Hava Nagila","url":"https://www.myinstants.com/media/sounds/hava-nagila-1-hours-0.mp3","keyHint":""},{"id":235,"name":"Defy Gravity x God Is Kanye","url":"https://www.myinstants.com/media/sounds/defy-gravity-x-god-is-kanye.mp3","keyHint":""},{"id":236,"name":"CSGO AWP","url":"https://www.myinstants.com/media/sounds/awp_02.mp3","keyHint":""},{"id":237,"name":"Mexican Hat Dance","url":"https://www.myinstants.com/media/sounds/mexican_hat_dance.mp3","keyHint":""},{"id":238,"name":"Германия","url":"https://www.myinstants.com/media/sounds/germaniia_yYPmHKl.mp3","keyHint":""},{"id":239,"name":"пх","url":"https://www.myinstants.com/media/sounds/pkh.mp3","keyHint":""},{"id":240,"name":"Maybach Music","url":"https://www.myinstants.com/media/sounds/maybach-music-sound-effect.mp3","keyHint":""},{"id":241,"name":"Стипка228про","url":"https://www.myinstants.com/media/sounds/stipka228pro.mp3","keyHint":""},{"id":242,"name":"roblox horror","url":"https://www.myinstants.com/media/sounds/do-not-open.mp3","keyHint":""},{"id":243,"name":"Rizz walk","url":"https://www.myinstants.com/media/sounds/rizz-walk.mp3","keyHint":""},{"id":244,"name":"Minecraft Damage","url":"https://www.myinstants.com/media/sounds/minecraft_hit_soundmp3converter.mp3","keyHint":""},{"id":245,"name":"Nokia Kick Ringtone","url":"https://www.myinstants.com/media/sounds/nokia-kick-ringtone.mp3","keyHint":""},{"id":246,"name":"Charlie Brown Teacher","url":"https://www.myinstants.com/media/sounds/wha-wha1.mp3","keyHint":""},{"id":247,"name":"That was easy","url":"https://www.myinstants.com/media/sounds/that_was_easy.mp3","keyHint":""},{"id":248,"name":"uma rapariga é bom...","url":"https://www.myinstants.com/media/sounds/uma-rapariga-e-bom_SfeTmDo.mp3","keyHint":""},{"id":249,"name":"Tom AAAAAAAAA scream","url":"https://www.myinstants.com/media/sounds/tom-scream.mp3","keyHint":""},{"id":250,"name":"UMA RAPARIGA É BOM 3 É BOM DEMAIS","url":"https://www.myinstants.com/media/sounds/uma-rapariga-e-bom-3-e-bom-demais.mp3","keyHint":""},{"id":251,"name":"I\\u0027m fast as f boi","url":"https://www.myinstants.com/media/sounds/im-fast-as-f-boi.mp3","keyHint":""},{"id":252,"name":"Wah wah wah waaaaaaaahhh","url":"https://www.myinstants.com/media/sounds/wah-wah-sound-effect.mp3","keyHint":""},{"id":253,"name":"RIGHT FOOT CREEP","url":"https://www.myinstants.com/media/sounds/right-foot-creep.mp3","keyHint":""},{"id":254,"name":"Charlie kirky funk","url":"https://www.myinstants.com/media/sounds/charlie-kirky-funk.mp3","keyHint":""},{"id":255,"name":"help me!","url":"https://www.myinstants.com/media/sounds/2020-10-29-21-41-22.mp3","keyHint":""},{"id":256,"name":"Мелстрой пам\\u002Dпам\\u002Dпам","url":"https://www.myinstants.com/media/sounds/melstroi-pam-pam-pam.mp3","keyHint":""},{"id":257,"name":"He Needs Some Milk","url":"https://www.myinstants.com/media/sounds/he-needs-some-milk-vine.mp3","keyHint":""},{"id":258,"name":"Oh Brother, This Guy Stinks!","url":"https://www.myinstants.com/media/sounds/oh-brother-this-guy-stinks.mp3","keyHint":""},{"id":259,"name":"running sound","url":"https://www.myinstants.com/media/sounds/1-108.mp3","keyHint":""},{"id":260,"name":"GTA V \\u002D Wasted","url":"https://www.myinstants.com/media/sounds/gta-v-death-sound-effect-102.mp3","keyHint":""},{"id":261,"name":"WIDE PUTIN MEME","url":"https://www.myinstants.com/media/sounds/my-movie-6_0RlWMvM.mp3","keyHint":""},{"id":262,"name":"American Anthem (Gun and Eagle)","url":"https://www.myinstants.com/media/sounds/american-anthem-gun-and-eagle.mp3","keyHint":""},{"id":263,"name":"correct (ding)","url":"https://www.myinstants.com/media/sounds/ding-sound-effect_1.mp3","keyHint":""},{"id":264,"name":"I\\u0027m Gonna Come Trump","url":"https://www.myinstants.com/media/sounds/im-gonna-come_6HehWm4.mp3","keyHint":""},{"id":265,"name":"EAGLE RAHHH","url":"https://www.myinstants.com/media/sounds/eagle-rahhh.mp3","keyHint":""},{"id":266,"name":"cod zombie scream","url":"https://www.myinstants.com/media/sounds/img_6228.mp3","keyHint":""},{"id":267,"name":"hitmarker.mp3","url":"https://www.myinstants.com/media/sounds/hitmarker_2.mp3","keyHint":""},{"id":268,"name":"rust c4","url":"https://www.myinstants.com/media/sounds/rust-c4.mp3","keyHint":""},{"id":269,"name":"tactical nuke incoming!!!","url":"https://www.myinstants.com/media/sounds/tactical-nuke.mp3","keyHint":""},{"id":270,"name":"OH SHIT! (echo)","url":"https://www.myinstants.com/media/sounds/oh-shit_4.mp3","keyHint":""},{"id":271,"name":"Goku Yelling","url":"https://www.myinstants.com/media/sounds/gokuyelling.mp3","keyHint":""},{"id":272,"name":"WTF is a kilometer","url":"https://www.myinstants.com/media/sounds/wtf-is-a-kilometer.mp3","keyHint":""},{"id":273,"name":"Nuke Bomb!","url":"https://www.myinstants.com/media/sounds/nuke-bomb.mp3","keyHint":""},{"id":274,"name":"LOUD Taco Bell Bong","url":"https://www.myinstants.com/media/sounds/taco-bell.mp3","keyHint":""},{"id":275,"name":"I got a glock in my rori","url":"https://www.myinstants.com/media/sounds/fetty_wap_679_feat_2.mp3","keyHint":""},{"id":276,"name":"Water Droplet Drip","url":"https://www.myinstants.com/media/sounds/water-droplet-drip.mp3","keyHint":""},{"id":277,"name":"Modi ji bkl","url":"https://www.myinstants.com/media/sounds/modi-ji-bkl.mp3","keyHint":""},{"id":278,"name":"GANGNAM STYLE","url":"https://www.myinstants.com/media/sounds/psy-gangnam-style-1.mp3","keyHint":""},{"id":279,"name":"Jackpot","url":"https://www.myinstants.com/media/sounds/slot-machine-jackpot-sound-effect.mp3","keyHint":""},{"id":280,"name":"Hamood habibi","url":"https://www.myinstants.com/media/sounds/hamood-habibi-3.mp3","keyHint":""},{"id":281,"name":"USA Chant","url":"https://www.myinstants.com/media/sounds/usa-chant.mp3","keyHint":""},{"id":282,"name":"Lancer splat","url":"https://www.myinstants.com/media/sounds/lancer-splat.mp3","keyHint":""},{"id":283,"name":"Law \\u0026 Order","url":"https://www.myinstants.com/media/sounds/law-order-sound-effect-hq.mp3","keyHint":""},{"id":284,"name":"And they say","url":"https://www.myinstants.com/media/sounds/and-they-say.mp3","keyHint":""},{"id":285,"name":"Jutsu Activation","url":"https://www.myinstants.com/media/sounds/katon.mp3","keyHint":""},{"id":286,"name":"BADUM TSS","url":"https://www.myinstants.com/media/sounds/joke_drum_effect.mp3","keyHint":""},{"id":287,"name":"Fortnite drinking","url":"https://www.myinstants.com/media/sounds/fortnite-shield-potion-fortnite-battle-royale-gaming-sound-effect-hd-sound-effect_rnYyvja.mp3","keyHint":""},{"id":288,"name":"WE ARE THE CHAMPIONS","url":"https://www.myinstants.com/media/sounds/we-are-the-champions-copia.mp3","keyHint":""},{"id":289,"name":"Trump Win Too Much","url":"https://www.myinstants.com/media/sounds/trump-win-too-much.mp3","keyHint":""},{"id":290,"name":"Super Saiyan Aura","url":"https://www.myinstants.com/media/sounds/saiyan.mp3","keyHint":""},{"id":291,"name":"booing","url":"https://www.myinstants.com/media/sounds/booing.mp3","keyHint":""},{"id":292,"name":"Donald Trump: \\u0022Obamna\\u0022","url":"https://www.myinstants.com/media/sounds/obamna.mp3","keyHint":""},{"id":293,"name":"But I poop from there","url":"https://www.myinstants.com/media/sounds/but-i-poop-from-there.mp3","keyHint":""},{"id":294,"name":"instagram thud","url":"https://www.myinstants.com/media/sounds/vine-boom-sound-effect_KT89XIq.mp3","keyHint":""},{"id":295,"name":"Shocked sound","url":"https://www.myinstants.com/media/sounds/shocked-sound-effect.mp3","keyHint":""},{"id":296,"name":"oh no no no laugh","url":"https://www.myinstants.com/media/sounds/oh-no-no-no-no-laugh.mp3","keyHint":""},{"id":297,"name":"СКАЧАЙ МАКС","url":"https://www.myinstants.com/media/sounds/skachai-maks.mp3","keyHint":""},{"id":298,"name":"nelly ahh","url":"https://www.myinstants.com/media/sounds/ahh_gLSTOu4.mp3","keyHint":""},{"id":299,"name":"They ask you how you are meme","url":"https://www.myinstants.com/media/sounds/they-ask-you-how-you-are-and-you-just-have-to-say-that-youre-fine-sound-effect_IgYM1CV.mp3","keyHint":""},{"id":300,"name":"Keyboard Typing Sound","url":"https://www.myinstants.com/media/sounds/keyboard-typing-sound-effect.mp3","keyHint":""}]
-    };
+    // Background particles
+    (() => {
+      const canvas = document.getElementById("bg-canvas");
+      const ctx = canvas.getContext("2d");
+      let particles = [];
+      const mouse = { x: null, y: null, radius: 180 };
 
-    const MANUAL_GAMES = [
-      {
-        id: 0,
-        slug: "five-nights-at-epsteins",
-        name: "Five Nights At Epstein's",
-        sourcePage: "https://html-classic.itch.zone/html/15867499/asdd/index.html",
-        embedUrl: "https://html-classic.itch.zone/html/15867499/asdd/index.html",
-        fileUrl: "",
-        icon: "https://img.itch.zone/aW1nLzI0NTkxMDM1LnBuZw==/original/FsMWrt.png"
+      window.addEventListener("mousemove", (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+      });
+
+      window.addEventListener("mouseout", () => {
+        mouse.x = null;
+        mouse.y = null;
+      });
+
+      function init() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        particles = [];
+        const count = (canvas.width * canvas.height) / 11000;
+
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 1.5 + 0.5,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4
+          });
+        }
       }
+
+      function connect() {
+        for (let a = 0; a < particles.length; a++) {
+          for (let b = a + 1; b < particles.length; b++) {
+            const dx = particles[a].x - particles[b].x;
+            const dy = particles[a].y - particles[b].y;
+            const distance = Math.hypot(dx, dy);
+
+            if (distance < 150) {
+              const opacity = 1 - distance / 150;
+              ctx.strokeStyle = `rgba(100,210,255,${opacity * 0.2})`;
+              ctx.lineWidth = 0.8;
+              ctx.beginPath();
+              ctx.moveTo(particles[a].x, particles[a].y);
+              ctx.lineTo(particles[b].x, particles[b].y);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      function animate() {
+        ctx.fillStyle = "rgba(1, 4, 9, 0.15)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (const p of particles) {
+          p.x += p.vx;
+          p.y += p.vy;
+
+          if (p.x > canvas.width) p.x = 0;
+          if (p.x < 0) p.x = canvas.width;
+          if (p.y > canvas.height) p.y = 0;
+          if (p.y < 0) p.y = canvas.height;
+
+          if (mouse.x != null) {
+            const dx = mouse.x - p.x;
+            const dy = mouse.y - p.y;
+            const d = Math.hypot(dx, dy);
+
+            if (d < mouse.radius) {
+              const force = (mouse.radius - d) / mouse.radius;
+              p.x -= (dx / 50) * force;
+              p.y -= (dy / 50) * force;
+            }
+          }
+
+          ctx.fillStyle = "rgba(100,210,255,0.8)";
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        connect();
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener("resize", init);
+      init();
+      animate();
+    })();
+
+    const homeMessage = document.getElementById("home-message");
+    const rotatingMessages = [
+      "skyler, i know where you live",
+      "made by matteo, if you got this do NOT tell anyone you cant trust",
+      "uhhhhhhhhhhhhhhhhhhhhhhhhhhh"
     ];
 
-    const HOT_GAME_TOKENS = [
-      "five nights at epsteins",
-      "run 3",
-      "1v1 lol",
-      "basketball stars",
-      "cookie clicker",
-      "minecraft"
-    ];
+    function pickRandomMessage(exclude = "") {
+      const pool = rotatingMessages.filter(m => m !== exclude);
+      return pool[Math.floor(Math.random() * pool.length)] || rotatingMessages[0];
+    }
+
+    function rotateHomeMessage() {
+      const current = homeMessage.textContent || "";
+      homeMessage.classList.add("fade-out");
+      setTimeout(() => {
+        homeMessage.textContent = pickRandomMessage(current);
+        homeMessage.classList.remove("fade-out");
+      }, 240);
+    }
+
+    homeMessage.textContent = pickRandomMessage();
+    setInterval(rotateHomeMessage, 5000);
 
     const views = {
       home: document.getElementById("home-view"),
@@ -641,316 +650,220 @@
       sounds: document.getElementById("sounds-view")
     };
 
-    const homeView = document.getElementById("home-view");
-    const navItems = Array.from(document.querySelectorAll(".selenite-sidebar .nav-item"));
+    const navItems = Array.from(document.querySelectorAll(".nav-item"));
     const gameGrid = document.getElementById("game-grid");
     const soundGrid = document.getElementById("sound-grid");
-    const gamesPanel = document.getElementById("games-panel");
-    const soundsPanel = document.getElementById("sounds-panel");
     const gamesSearch = document.getElementById("games-search");
     const soundsSearch = document.getElementById("sounds-search");
-    const gamesMeta = document.getElementById("games-meta");
 
     const overlay = document.getElementById("player-overlay");
     const frame = document.getElementById("game-frame");
     const gameStatus = document.getElementById("game-status");
-
     const topBar = document.getElementById("top-bar");
     const toggleTrigger = document.getElementById("toggle-trigger");
-    const backHomeBtn = document.getElementById("back-home");
+    const backBtn = document.getElementById("back-btn");
     const fullscreenBtn = document.getElementById("fullscreen-btn");
 
-    const bgCanvas = document.getElementById("bg-canvas");
-    const bgCtx = bgCanvas.getContext("2d");
-    let bgParticles = [];
-    const bgMouse = { x: null, y: null, radius: 180 };
-
-    let gameObserver = null;
-    let soundObserver = null;
-    let gameOpenToken = 0;
-    let closeOverlayTimer = 0;
-    const OVERLAY_ANIM_MS = 280;
-    const players = new Map();
-
-    function norm(value) {
-      return (value || "").toLowerCase().trim();
+    function norm(v) {
+      return (v || "").toString().toLowerCase().trim();
     }
 
-    function canon(value) {
-      return norm(value).replace(/[^a-z0-9]+/g, "");
-    }
-
-    function slugify(value) {
-      return norm(value).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "game";
-    }
-
-    function isHotGame(game) {
-      const g = canon(game?.name || "");
-      if (!g) return false;
-      for (const token of HOT_GAME_TOKENS) {
-        const t = canon(token);
-        if (g === t || g.includes(t) || t.includes(g)) return true;
+    function setView(name) {
+      for (const [key, node] of Object.entries(views)) {
+        node.classList.toggle("active", key === name);
       }
-      return false;
+      navItems.forEach(btn => btn.classList.toggle("active", btn.dataset.view === name));
     }
 
-    function uniqueGames(list) {
-      const source = Array.isArray(list) ? list : [];
-      const seenByName = new Set();
-      const seenByUrl = new Set();
-      const unique = [];
+    navItems.forEach(btn => {
+      btn.addEventListener("click", () => setView(btn.dataset.view));
+    });
 
-      for (const game of source) {
-        const name = (game?.name || "untitled game").trim();
-        const sourcePage = game?.sourcePage || game?.embedUrl || "";
-        const embedUrl = game?.embedUrl || sourcePage;
-        const fileUrl = game?.fileUrl || "";
-        const icon = game?.icon || "";
-        const slug = game?.slug || slugify(name);
+    const HOT_NAMES = new Set([
+      "five nights at epstein's",
+      "run 3",
+      "ovo",
+      "1v1.lol",
+      "cookie clicker"
+    ]);
 
-        const nameKey = canon(name);
-        const urlKey = norm(embedUrl || sourcePage);
+    function slugify(text) {
+      return norm(text).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "game";
+    }
 
-        if ((nameKey && seenByName.has(nameKey)) || (urlKey && seenByUrl.has(urlKey))) continue;
+    function dedupeGames(list) {
+      const seen = new Set();
+      const out = [];
 
-        if (nameKey) seenByName.add(nameKey);
-        if (urlKey) seenByUrl.add(urlKey);
+      for (const game of list) {
+        const key = norm(game.url) || norm(game.name);
+        if (!key || seen.has(key)) continue;
+        seen.add(key);
+        out.push(game);
+      }
+      return out.map((g, i) => ({ ...g, id: i + 1 }));
+    }
 
-        unique.push({
-          id: 0,
-          slug,
-          name,
-          sourcePage,
-          embedUrl,
-          fileUrl,
-          icon
-        });
+    function markHot(game) {
+      return !!game.hot || HOT_NAMES.has(norm(game.name));
+    }
+
+    function mapGame(raw) {
+      const name = raw.name || raw.title || "Untitled Game";
+      const url = raw.url || raw.embedUrl || raw.src || raw.link || "";
+      const icon = raw.icon || raw.image || raw.thumbnail || "";
+      return {
+        id: 0,
+        slug: raw.slug || slugify(name),
+        name,
+        url,
+        icon,
+        hot: markHot({ ...raw, name })
+      };
+    }
+
+    function walkGames(node, bucket) {
+      if (Array.isArray(node)) {
+        node.forEach(v => walkGames(v, bucket));
+        return;
+      }
+      if (!node || typeof node !== "object") return;
+
+      const candidate = {
+        name: node.name || node.title,
+        url: node.url || node.embedUrl || node.gameUrl || node.link || node.src || node.iframe,
+        icon: node.icon || node.image || node.thumbnail || node.cover || node.img,
+        slug: node.slug
+      };
+
+      if (candidate.name && candidate.url && /^https?:\/\//i.test(candidate.url)) {
+        bucket.push(mapGame(candidate));
       }
 
-      return unique.map((game, idx) => ({ ...game, id: idx + 1 }));
+      Object.values(node).forEach(v => walkGames(v, bucket));
     }
 
-    function toAbsolute(base, path) {
-      if (!path) return "";
+    async function fetchJson(url) {
       try {
-        return new URL(path, base).href;
-      } catch {
-        return "";
-      }
-    }
-
-    async function fetchJson(url, timeoutMs = 25000) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try {
-        const res = await fetch(url, { cache: "no-store", signal: controller.signal });
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) return null;
         return await res.json();
       } catch {
         return null;
-      } finally {
-        clearTimeout(timer);
       }
     }
 
-    function mapSeleniteGames(feed) {
-      if (!Array.isArray(feed)) return [];
-      return feed
-        .filter((item) => item && item.name && item.directory)
-        .map((item) => {
-          const dir = String(item.directory).replace(/^\/+/, "");
-          const link = toAbsolute("https://selenite-copy.pages.dev/", dir + "/index.html");
-          const icon = toAbsolute("https://selenite-copy.pages.dev/", dir + "/" + (item.image || "icon.png"));
-          return {
-            id: 0,
-            slug: slugify(item.name),
-            name: item.name,
-            sourcePage: link,
-            embedUrl: link,
-            fileUrl: "",
-            icon
-          };
-        });
-    }
+    const customGames = [
+      {
+        name: "Five Nights At Epstein's",
+        url: "https://html-classic.itch.zone/html/15867499/asdd/index.html",
+        icon: "https://img.itch.zone/aW1nLzI0NTkxMDM1LnBuZw==/original/FsMWrt.png",
+        hot: true
+      },
+      {
+        name: "Run 3",
+        url: "https://rawcdn.githack.com/3kh0/3kh0-assets/main/run3/index.html",
+        icon: "https://raw.githubusercontent.com/3kh0/3kh0-assets/main/run3/img/icon.png",
+        hot: true
+      },
+      {
+        name: "OvO",
+        url: "https://rawcdn.githack.com/3kh0/3kh0-assets/main/ovo/index.html",
+        icon: "https://raw.githubusercontent.com/3kh0/3kh0-assets/main/ovo/ovo.png",
+        hot: true
+      }
+    ].map(mapGame);
 
-    function map1kh0Games(feed) {
-      if (!Array.isArray(feed)) return [];
-      return feed
-        .filter((item) => item && item.title && item.link)
-        .map((item) => ({
-          id: 0,
-          slug: slugify(item.title),
-          name: item.title,
-          sourcePage: toAbsolute("https://1kh0.github.io/", item.link),
-          embedUrl: toAbsolute("https://1kh0.github.io/", item.link),
-          fileUrl: "",
-          icon: toAbsolute("https://1kh0.github.io/", item.imgSrc || "")
-        }));
-    }
+    const fallbackGames = [
+      {
+        name: "Cookie Clicker",
+        url: "https://rawcdn.githack.com/3kh0/3kh0-assets/main/cookieclicker/index.html",
+        icon: "https://raw.githubusercontent.com/3kh0/3kh0-assets/main/cookieclicker/img/perfectCookie.png",
+        hot: true
+      },
+      {
+        name: "1v1.LOL",
+        url: "https://binbashbanana.github.io/webretro/",
+        icon: "https://www.google.com/s2/favicons?sz=256&domain_url=https://1v1.lol",
+        hot: true
+      }
+    ].map(mapGame);
 
-    let allGames = uniqueGames(data.games);
-    const allSounds = Array.isArray(data.sounds) ? data.sounds : [];
+    let allGames = [];
 
-    function playHomeAnimation() {
-      homeView.classList.remove("play");
-      void homeView.offsetWidth;
-      homeView.classList.add("play");
-    }
-
-    function setView(nextView) {
-      Object.entries(views).forEach(([name, node]) => {
-        node.classList.toggle("active", name === nextView);
+    function sortGames(list) {
+      return [...list].sort((a, b) => {
+        if (a.hot !== b.hot) return a.hot ? -1 : 1;
+        return a.name.localeCompare(b.name);
       });
-
-      navItems.forEach((item) => {
-        item.classList.toggle("active", item.dataset.view === nextView);
-      });
-
-      if (nextView === "games") requestAnimationFrame(() => wireObserver(gamesPanel, ".game-card", "game"));
-      if (nextView === "sounds") requestAnimationFrame(() => wireObserver(soundsPanel, ".sound-btn", "sound"));
-      if (nextView === "home") playHomeAnimation();
-    }
-
-    navItems.forEach((item) => {
-      item.addEventListener("click", () => setView(item.dataset.view));
-    });
-
-    function wireObserver(rootNode, selector, kind) {
-      const prev = kind === "game" ? gameObserver : soundObserver;
-      if (prev) prev.disconnect();
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          entry.target.classList.toggle("in", entry.intersectionRatio >= 0.12);
-        });
-      }, {
-        root: rootNode,
-        threshold: [0, 0.12, 0.24, 0.5, 0.8, 1]
-      });
-
-      rootNode.querySelectorAll(selector).forEach((node) => observer.observe(node));
-
-      if (kind === "game") gameObserver = observer;
-      if (kind === "sound") soundObserver = observer;
-    }
-
-    function getFallbackGameIcon(game) {
-      const target = game.sourcePage || game.embedUrl || "";
-      if (!target) return "";
-      return "https://www.google.com/s2/favicons?sz=256&domain_url=" + encodeURIComponent(target);
     }
 
     function renderGames(list) {
       gameGrid.innerHTML = "";
-      const fragment = document.createDocumentFragment();
+      if (!list.length) {
+        gameGrid.innerHTML = '<p class="empty">No games found.</p>';
+        return;
+      }
 
-      list.forEach((game) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "game-card";
-        button.title = game.name;
-        button.setAttribute("aria-label", game.name);
+      const frag = document.createDocumentFragment();
+      list.forEach((game, idx) => {
+        const btn = document.createElement("button");
+        btn.className = "game-card";
+        btn.type = "button";
+        btn.title = game.name;
+        btn.setAttribute("aria-label", game.name);
 
-        if (isHotGame(game)) {
-          const badge = document.createElement("span");
-          badge.className = "hot-badge";
-          badge.textContent = "HOT";
-          button.appendChild(badge);
+        const img = document.createElement("img");
+        img.src = game.icon || `https://www.google.com/s2/favicons?sz=256&domain_url=${encodeURIComponent(game.url)}`;
+        img.alt = game.name;
+        img.loading = "lazy";
+        img.referrerPolicy = "no-referrer";
+        img.onerror = () => {
+          img.src = `https://www.google.com/s2/favicons?sz=256&domain_url=${encodeURIComponent(game.url)}`;
+        };
+
+        if (game.hot) {
+          const hot = document.createElement("span");
+          hot.className = "hot-tag";
+          hot.textContent = "HOT";
+          btn.appendChild(hot);
         }
 
-        const image = document.createElement("img");
-        const fallbackIcon = getFallbackGameIcon(game);
-        image.src = game.icon || fallbackIcon;
-        image.alt = game.name;
-        image.loading = "lazy";
-        image.decoding = "async";
-        image.referrerPolicy = "no-referrer";
-        image.addEventListener("error", () => {
-          if (fallbackIcon && image.src !== fallbackIcon) image.src = fallbackIcon;
-        });
+        const label = document.createElement("span");
+        label.className = "game-name";
+        label.textContent = game.name;
 
-        const name = document.createElement("div");
-        name.className = "game-name";
-        name.textContent = game.name;
+        btn.appendChild(img);
+        btn.appendChild(label);
+        btn.addEventListener("click", () => openGame(game));
 
-        button.appendChild(image);
-        button.appendChild(name);
-        button.addEventListener("click", () => openGame(game));
-        fragment.appendChild(button);
+        frag.appendChild(btn);
+        setTimeout(() => btn.classList.add("in"), idx * 8);
       });
-
-      gameGrid.appendChild(fragment);
-      wireObserver(gamesPanel, ".game-card", "game");
-    }
-
-    function renderSounds(list) {
-      soundGrid.innerHTML = "";
-      const fragment = document.createDocumentFragment();
-
-      const colors = [
-        { main: "#ff5f5f", shadow: "#c44545" },
-        { main: "#5fafff", shadow: "#4585c4" },
-        { main: "#5fff7d", shadow: "#45c45e" },
-        { main: "#ffdf5f", shadow: "#c4ab45" },
-        { main: "#af5fff", shadow: "#8045c4" }
-      ];
-
-      list.forEach((sound, index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "sound-btn";
-        button.setAttribute("aria-label", sound.name || "sound");
-
-        const color = colors[index % colors.length];
-        button.style.backgroundColor = color.main;
-        button.style.boxShadow = "0 8px 0 " + color.shadow + ", 0 15px 20px rgba(0,0,0,0.12)";
-        button.innerHTML = '<span class="btn-label">' + (sound.name || "sound") + "</span>";
-        button.addEventListener("click", () => playSound(sound.url));
-
-        fragment.appendChild(button);
-      });
-
-      soundGrid.appendChild(fragment);
-      wireObserver(soundsPanel, ".sound-btn", "sound");
+      gameGrid.appendChild(frag);
     }
 
     function applyGamesFilter() {
-      const query = norm(gamesSearch.value);
-      const filtered = query ? allGames.filter((game) => norm(game.name).includes(query)) : [...allGames];
-
-      filtered.sort((a, b) => {
-        const aHot = isHotGame(a) ? 0 : 1;
-        const bHot = isHotGame(b) ? 0 : 1;
-        if (aHot !== bHot) return aHot - bHot;
-        return a.name.localeCompare(b.name);
-      });
-
-      gamesMeta.textContent = filtered.length + " / " + allGames.length + " games";
-      renderGames(filtered);
-      gamesPanel.scrollTop = 0;
+      const q = norm(gamesSearch.value);
+      const filtered = q ? allGames.filter(g => norm(g.name).includes(q)) : allGames;
+      renderGames(sortGames(filtered));
     }
 
-    function applySoundsFilter() {
-      const query = norm(soundsSearch.value);
-      const filtered = query ? allSounds.filter((sound) => norm(sound.name).includes(query)) : allSounds;
-      renderSounds(filtered);
-      soundsPanel.scrollTop = 0;
-    }
+    async function loadGames() {
+      gameGrid.innerHTML = '<p class="empty">Loading games...</p>';
 
-    function getPlayer(url) {
-      if (!players.has(url)) {
-        const audio = new Audio(url);
-        audio.preload = "none";
-        players.set(url, audio);
-      }
-      return players.get(url);
-    }
+      const [g1, g2] = await Promise.all([
+        fetchJson("https://selenite-copy.pages.dev/games.json"),
+        fetchJson("https://1kh0.github.io/config/games.json")
+      ]);
 
-    function playSound(url) {
-      if (!url) return;
-      const audio = getPlayer(url);
-      audio.currentTime = 0;
-      audio.play().catch(() => {});
+      const extracted = [];
+      walkGames(g1, extracted);
+      walkGames(g2, extracted);
+
+      const merged = dedupeGames([...customGames, ...extracted, ...fallbackGames].filter(g => g.url));
+      allGames = sortGames(merged);
+      applyGamesFilter();
     }
 
     function showStatus(text) {
@@ -962,12 +875,41 @@
       gameStatus.classList.add("hide");
     }
 
-    function resetTopBar() {
+    function openGame(game) {
+      overlay.style.display = "block";
       topBar.classList.remove("hidden");
       toggleTrigger.textContent = "HIDE BAR";
+      showStatus("loading...");
+      frame.src = "about:blank";
+
+      frame.onload = () => hideStatus();
+      frame.onerror = () => showStatus("blocked in iframe");
+
+      requestAnimationFrame(() => {
+        frame.src = game.url;
+      });
     }
 
-    function toggleBar() {
+    function closeGame() {
+      overlay.style.display = "none";
+      frame.src = "about:blank";
+      hideStatus();
+      setView("games");
+    }
+
+    backBtn.addEventListener("click", closeGame);
+
+    fullscreenBtn.addEventListener("click", async () => {
+      try {
+        if (!document.fullscreenElement) {
+          await overlay.requestFullscreen();
+        } else {
+          await document.exitFullscreen();
+        }
+      } catch {}
+    });
+
+    toggleTrigger.addEventListener("click", () => {
       if (topBar.classList.contains("hidden")) {
         topBar.classList.remove("hidden");
         toggleTrigger.textContent = "HIDE BAR";
@@ -975,209 +917,128 @@
         topBar.classList.add("hidden");
         toggleTrigger.textContent = "SHOW BAR";
       }
+    });
+
+    const allSounds = [
+      { name: "VINE BOOM SOUND", url: "https://www.myinstants.com/media/sounds/vine-boom.mp3" },
+      { name: "Metal pipe clang", url: "https://www.myinstants.com/media/sounds/metal-pipe-clang.mp3" },
+      { name: "Discord Notification", url: "https://www.myinstants.com/media/sounds/discord-notification.mp3" },
+      { name: "Windows XP Error", url: "https://www.myinstants.com/media/sounds/erro.mp3" },
+      { name: "MLG AIR HORN", url: "https://www.myinstants.com/media/sounds/mlg-airhorn.mp3" },
+      { name: "ROBLOX oof", url: "https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3" },
+      { name: "The Price is Right Losing Horn", url: "https://www.myinstants.com/media/sounds/the-price-is-right-losing-horn.mp3" },
+      { name: "Wrong Answer Buzzer", url: "https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3" },
+      { name: "FNAF Jumpscare Scream", url: "https://www.myinstants.com/media/sounds/five-nights-at-freddys-full-scream-sound_2.mp3" },
+      { name: "Coin Mario", url: "https://www.myinstants.com/media/sounds/super-mario-coin-sound.mp3" },
+      { name: "Screaming Sheep", url: "https://www.myinstants.com/media/sounds/01-the-screaming-sheep.mp3" },
+      { name: "you've got mail", url: "https://www.myinstants.com/media/sounds/yougotmail.mp3" },
+      { name: "NFL Draft Chime", url: "https://www.myinstants.com/media/sounds/nfl-draft-chime.mp3" },
+      { name: "To be Continued (jojo)", url: "https://www.myinstants.com/media/sounds/untitled_1071.mp3" },
+      { name: "Sad Violin", url: "https://www.myinstants.com/media/sounds/tf_nemesis.mp3" },
+      { name: "Taco Bell Bong", url: "https://www.myinstants.com/media/sounds/taco-bell-bong-sfx.mp3" },
+      { name: "Fart Meme Sound", url: "https://www.myinstants.com/media/sounds/fart-meme-sound.mp3" },
+      { name: "Ding Sound Effect", url: "https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" },
+      { name: "Shut up!", url: "https://www.myinstants.com/media/sounds/shutup.swf.mp3" },
+      { name: "Prowler Sound Effect", url: "https://www.myinstants.com/media/sounds/prowler-sound-effect_6bXErot.mp3" },
+      { name: "Dune Scream", url: "https://www.myinstants.com/media/sounds/dune-scream.mp3" },
+      { name: "GTA V - Wasted", url: "https://www.myinstants.com/media/sounds/gta-v-death-sound-effect-102.mp3" },
+      { name: "Law & Order", url: "https://www.myinstants.com/media/sounds/law-order-sound-effect-hq.mp3" },
+      { name: "BADUM TSS", url: "https://www.myinstants.com/media/sounds/joke_drum_effect.mp3" },
+      { name: "WE ARE THE CHAMPIONS", url: "https://www.myinstants.com/media/sounds/we-are-the-champions-copia.mp3" },
+      { name: "booing", url: "https://www.myinstants.com/media/sounds/booing.mp3" },
+      { name: "anime ahh", url: "https://www.myinstants.com/media/sounds/anime-ahh.mp3" },
+      { name: "Spongebob boowomp", url: "https://www.myinstants.com/media/sounds/spongebob-boowomp.mp3" },
+      { name: "Mii Channel Music", url: "https://www.myinstants.com/media/sounds/mii-channel-music.mp3" },
+      { name: "Free Bird Solo", url: "https://www.myinstants.com/media/sounds/free-bird-solo.mp3" },
+      { name: "Awkward Moment", url: "https://www.myinstants.com/media/sounds/awkward-moment.mp3" },
+      { name: "TV Static", url: "https://www.myinstants.com/media/sounds/tv-static-01.mp3" },
+      { name: "Darth Vader NOOOOO", url: "https://www.myinstants.com/media/sounds/nooo.mp3" },
+      { name: "Homer Simpson Scream", url: "https://www.myinstants.com/media/sounds/tmp90lreogl.mp3" },
+      { name: "Darth Vader Theme", url: "https://www.myinstants.com/media/sounds/darth-vader-theme.mp3" },
+      { name: "CSGO AWP", url: "https://www.myinstants.com/media/sounds/awp_02.mp3" },
+      { name: "Nokia Kick Ringtone", url: "https://www.myinstants.com/media/sounds/nokia-kick-ringtone.mp3" },
+      { name: "Tom scream", url: "https://www.myinstants.com/media/sounds/tom-scream.mp3" },
+      { name: "RUN vine", url: "https://www.myinstants.com/media/sounds/run-vine-sound-effect.mp3" },
+      { name: "Goku Yelling", url: "https://www.myinstants.com/media/sounds/gokuyelling.mp3" },
+      { name: "Nuke Bomb", url: "https://www.myinstants.com/media/sounds/nuke-bomb.mp3" },
+      { name: "EAGLE RAHHH", url: "https://www.myinstants.com/media/sounds/eagle-rahhh.mp3" },
+      { name: "tactical nuke incoming", url: "https://www.myinstants.com/media/sounds/tactical-nuke.mp3" },
+      { name: "Rust C4", url: "https://www.myinstants.com/media/sounds/rust-c4.mp3" },
+      { name: "Hitmarker", url: "https://www.myinstants.com/media/sounds/hitmarker_2.mp3" },
+      { name: "Gun Reload", url: "https://www.myinstants.com/media/sounds/gunreload.mp3" },
+      { name: "Knocked Player Fortnite", url: "https://www.myinstants.com/media/sounds/ui-negative-alert.mp3" },
+      { name: "Minecraft XP Sound", url: "https://www.myinstants.com/media/sounds/orb.mp3" },
+      { name: "Minecraft Explosion", url: "https://www.myinstants.com/media/sounds/minecraft-explosion-green-screen.mp3" },
+      { name: "Error SOUNDSS", url: "https://www.myinstants.com/media/sounds/error_CDOxCYm.mp3" },
+      { name: "Oh Brother, This Guy Stinks!", url: "https://www.myinstants.com/media/sounds/oh-brother-this-guy-stinks.mp3" },
+      { name: "He Needs Some Milk", url: "https://www.myinstants.com/media/sounds/he-needs-some-milk-vine.mp3" },
+      { name: "Keyboard Typing", url: "https://www.myinstants.com/media/sounds/keyboard-typing-sound-effect.mp3" },
+      { name: "Jeopardy Theme", url: "https://www.myinstants.com/media/sounds/jeopardy-themelq.mp3" },
+      { name: "Final Jeopardy", url: "https://www.myinstants.com/media/sounds/jeopardy-final-jeopardy-thinking-music.mp3" },
+      { name: "Cartoon run take off", url: "https://www.myinstants.com/media/sounds/take-off_2YqCEjc.mp3" },
+      { name: "YAAAAAAAAY", url: "https://www.myinstants.com/media/sounds/kids-saying-yay-sound-effect_3.mp3" },
+      { name: "cat laugh meme", url: "https://www.myinstants.com/media/sounds/cat-laugh-meme-1.mp3" },
+      { name: "my mommy said no more skibidi toilet", url: "https://www.myinstants.com/media/sounds/my-mommy-said-no-more-skibidi-toilet.mp3" },
+      { name: "GANGNAM STYLE", url: "https://www.myinstants.com/media/sounds/psy-gangnam-style-1.mp3" },
+      { name: "Hamood habibi", url: "https://www.myinstants.com/media/sounds/hamood-habibi-3.mp3" },
+      { name: "USA Chant", url: "https://www.myinstants.com/media/sounds/usa-chant.mp3" },
+      { name: "Maybach Music", url: "https://www.myinstants.com/media/sounds/maybach-music-sound-effect.mp3" },
+      { name: "Rizz walk", url: "https://www.myinstants.com/media/sounds/rizz-walk.mp3" },
+      { name: "Shocked sound", url: "https://www.myinstants.com/media/sounds/shocked-sound-effect.mp3" },
+      { name: "Buzzer", url: "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" },
+      { name: "Applausing", url: "https://www.myinstants.com/media/sounds/applausing.mp3" }
+    ];
+
+    const soundPlayers = new Map();
+
+    function getPlayer(url) {
+      if (!soundPlayers.has(url)) {
+        const a = new Audio(url);
+        a.preload = "none";
+        soundPlayers.set(url, a);
+      }
+      return soundPlayers.get(url);
     }
 
-    async function tryFrameLoad(url, token) {
-      return await new Promise((resolve) => {
-        let done = false;
+    function playSound(url) {
+      const a = getPlayer(url);
+      a.currentTime = 0;
+      a.play().catch(() => {});
+    }
 
-        const finish = (ok) => {
-          if (done) return;
-          done = true;
-          frame.onload = null;
-          frame.onerror = null;
-          clearTimeout(timer);
-          resolve(ok);
-        };
+    function renderSounds(list) {
+      soundGrid.innerHTML = "";
+      if (!list.length) {
+        soundGrid.innerHTML = '<p class="empty">No sounds found.</p>';
+        return;
+      }
 
-        const timer = setTimeout(() => finish(false), 12000);
+      const frag = document.createDocumentFragment();
+      list.forEach((s, idx) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "sound-btn";
+        btn.setAttribute("aria-label", s.name);
+        btn.innerHTML = `<span class="sound-label">${s.name}</span>`;
+        btn.addEventListener("click", () => playSound(s.url));
 
-        frame.onload = () => {
-          if (token !== gameOpenToken) return finish(false);
-          try {
-            const href = frame.contentWindow && frame.contentWindow.location ? frame.contentWindow.location.href : "";
-            if (href === "about:blank" || href.startsWith("chrome-error://") || href.startsWith("edge-error://")) {
-              return finish(false);
-            }
-          } catch {
-            // cross-origin loaded
-          }
-          finish(true);
-        };
-
-        frame.onerror = () => finish(false);
-        frame.src = url;
+        frag.appendChild(btn);
+        setTimeout(() => btn.classList.add("in"), idx * 5);
       });
+      soundGrid.appendChild(frag);
     }
 
-    async function openGame(game) {
-      const token = ++gameOpenToken;
-
-      clearTimeout(closeOverlayTimer);
-      overlay.classList.add("open");
-      resetTopBar();
-      showStatus("loading...");
-      frame.src = "about:blank";
-
-      const attempts = [game.embedUrl, game.sourcePage]
-        .filter(Boolean)
-        .filter((v, i, arr) => arr.indexOf(v) === i);
-
-      for (const candidate of attempts) {
-        if (token !== gameOpenToken) return;
-        const ok = await tryFrameLoad(candidate, token);
-        if (token !== gameOpenToken) return;
-        if (ok) {
-          hideStatus();
-          return;
-        }
-      }
-
-      showStatus("blocked in iframe");
+    function applySoundsFilter() {
+      const q = norm(soundsSearch.value);
+      const filtered = q ? allSounds.filter(s => norm(s.name).includes(q)) : allSounds;
+      renderSounds(filtered);
     }
-
-    function closeGame() {
-      gameOpenToken += 1;
-      hideStatus();
-      resetTopBar();
-      overlay.classList.remove("open");
-
-      clearTimeout(closeOverlayTimer);
-      closeOverlayTimer = setTimeout(() => {
-        frame.src = "about:blank";
-        setView("games");
-      }, OVERLAY_ANIM_MS);
-    }
-
-    async function loadExternalGames() {
-      gamesSearch.placeholder = "Loading games...";
-      gamesMeta.textContent = "Fetching from both sources...";
-
-      const [seleniteRaw, kh0Raw] = await Promise.all([
-        fetchJson("https://selenite-copy.pages.dev/games.json"),
-        fetchJson("https://1kh0.github.io/config/games.json")
-      ]);
-
-      const merged = [
-        ...MANUAL_GAMES,
-        ...mapSeleniteGames(seleniteRaw),
-        ...map1kh0Games(kh0Raw)
-      ];
-
-      allGames = uniqueGames(merged);
-      applyGamesFilter();
-      gamesSearch.placeholder = "Search games... (" + allGames.length + ")";
-    }
-
-    function initBackground() {
-      bgCanvas.width = window.innerWidth;
-      bgCanvas.height = window.innerHeight;
-
-      bgParticles = [];
-      const count = (bgCanvas.width * bgCanvas.height) / 11000;
-      for (let i = 0; i < count; i += 1) {
-        bgParticles.push({
-          x: Math.random() * bgCanvas.width,
-          y: Math.random() * bgCanvas.height,
-          size: Math.random() * 1.5 + 0.5,
-          vx: (Math.random() - 0.5) * 0.4,
-          vy: (Math.random() - 0.5) * 0.4
-        });
-      }
-    }
-
-    function updateBackground() {
-      bgCtx.fillStyle = "rgba(1, 4, 9, 0.15)";
-      bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-
-      for (let i = 0; i < bgParticles.length; i += 1) {
-        const p = bgParticles[i];
-
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x > bgCanvas.width) p.x = 0;
-        if (p.x < 0) p.x = bgCanvas.width;
-        if (p.y > bgCanvas.height) p.y = 0;
-        if (p.y < 0) p.y = bgCanvas.height;
-
-        if (bgMouse.x != null) {
-          const dx = bgMouse.x - p.x;
-          const dy = bgMouse.y - p.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < bgMouse.radius) {
-            const force = (bgMouse.radius - distance) / bgMouse.radius;
-            p.x -= (dx / 50) * force;
-            p.y -= (dy / 50) * force;
-          }
-        }
-
-        bgCtx.fillStyle = "rgba(100, 210, 255, 0.8)";
-        bgCtx.beginPath();
-        bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        bgCtx.fill();
-      }
-
-      for (let a = 0; a < bgParticles.length; a += 1) {
-        for (let b = a + 1; b < bgParticles.length; b += 1) {
-          const dx = bgParticles[a].x - bgParticles[b].x;
-          const dy = bgParticles[a].y - bgParticles[b].y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-
-          if (distance < 150) {
-            const opacity = 1 - distance / 150;
-            bgCtx.strokeStyle = "rgba(100, 210, 255, " + opacity * 0.2 + ")";
-            bgCtx.lineWidth = 0.8;
-            bgCtx.beginPath();
-            bgCtx.moveTo(bgParticles[a].x, bgParticles[a].y);
-            bgCtx.lineTo(bgParticles[b].x, bgParticles[b].y);
-            bgCtx.stroke();
-          }
-        }
-      }
-
-      requestAnimationFrame(updateBackground);
-    }
-
-    window.addEventListener("mousemove", (e) => {
-      bgMouse.x = e.clientX;
-      bgMouse.y = e.clientY;
-    });
-
-    window.addEventListener("mouseout", () => {
-      bgMouse.x = null;
-      bgMouse.y = null;
-    });
-
-    window.addEventListener("resize", initBackground);
-
-    backHomeBtn.addEventListener("click", closeGame);
-    toggleTrigger.addEventListener("click", toggleBar);
-
-    fullscreenBtn.addEventListener("click", () => {
-      if (document.fullscreenElement) {
-        document.exitFullscreen().catch(() => {});
-      } else {
-        overlay.requestFullscreen().catch(() => {});
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && overlay.classList.contains("open")) {
-        closeGame();
-      }
-    });
 
     gamesSearch.addEventListener("input", applyGamesFilter);
     soundsSearch.addEventListener("input", applySoundsFilter);
 
-    applyGamesFilter();
     applySoundsFilter();
-    loadExternalGames();
-    requestAnimationFrame(playHomeAnimation);
-    initBackground();
-    updateBackground();
+    loadGames();
   </script>
 </body>
 </html>
