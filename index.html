@@ -12,16 +12,16 @@
       --text: #ffffff;
       --muted: #b8c2d1;
       --cyan: #00ffff;
-      --cyan-dim: rgba(0, 255, 255, 0.16);
     }
 
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
-    html, body {
+    html,
+    body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -78,19 +78,27 @@
       animation: homeIn 0.65s ease both;
     }
 
-    .message {
+    .message-track {
       margin-top: 10px;
-      font-size: 1rem;
-      color: #f0f4ff;
-      opacity: 1;
-      transition: opacity 0.45s ease;
-      animation: homeIn 0.65s 0.08s ease both;
-      min-height: 1.35em;
-      padding: 0 12px;
+      width: min(92vw, 1000px);
+      height: 1.5em;
+      overflow: hidden;
+      position: relative;
     }
 
-    .message.fade-out {
+    .message {
+      position: absolute;
+      left: 0;
+      white-space: nowrap;
+      font-size: 1rem;
+      letter-spacing: -0.2px;
+      color: #f0f4ff;
       opacity: 0;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .message.run {
+      animation: newsTicker 5.4s linear forwards;
     }
 
     .panel {
@@ -175,7 +183,7 @@
       background: #0a0a0a;
     }
 
-    .game-card .game-name {
+    .game-name {
       position: absolute;
       left: 0;
       right: 0;
@@ -183,7 +191,7 @@
       font-size: 0.78rem;
       line-height: 1.15;
       padding: 8px 9px;
-      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.86));
       text-align: left;
     }
 
@@ -254,7 +262,7 @@
       font-size: 0.95rem;
     }
 
-    /* Sidebar (your cyan style) */
+    /* Sidebar */
     .selenite-sidebar {
       position: fixed;
       top: 0;
@@ -446,6 +454,23 @@
       }
     }
 
+    @keyframes newsTicker {
+      0% {
+        transform: translateX(110vw);
+        opacity: 0;
+      }
+      8% {
+        opacity: 1;
+      }
+      92% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateX(-120%);
+        opacity: 0;
+      }
+    }
+
     @media (max-width: 700px) {
       .content {
         inset: 0 70px 0 0;
@@ -473,7 +498,9 @@
       <section id="home-view" class="view home active">
         <div>
           <h1 class="brand">nova</h1>
-          <p class="message" id="home-message"></p>
+          <div class="message-track">
+            <p class="message" id="home-message"></p>
+          </div>
         </div>
       </section>
 
@@ -526,7 +553,7 @@
   </div>
 
   <script>
-    // Background particles
+    // Background effect
     (() => {
       const canvas = document.getElementById("bg-canvas");
       const ctx = canvas.getContext("2d");
@@ -569,7 +596,7 @@
 
             if (distance < 150) {
               const opacity = 1 - distance / 150;
-              ctx.strokeStyle = `rgba(100,210,255,${opacity * 0.2})`;
+              ctx.strokeStyle = "rgba(100,210,255," + opacity * 0.2 + ")";
               ctx.lineWidth = 0.8;
               ctx.beginPath();
               ctx.moveTo(particles[a].x, particles[a].y);
@@ -620,30 +647,6 @@
       animate();
     })();
 
-    const homeMessage = document.getElementById("home-message");
-    const rotatingMessages = [
-      "skyler, i know where you live",
-      "made by matteo, if you got this do NOT tell anyone you cant trust",
-      "uhhhhhhhhhhhhhhhhhhhhhhhhhhh"
-    ];
-
-    function pickRandomMessage(exclude = "") {
-      const pool = rotatingMessages.filter(m => m !== exclude);
-      return pool[Math.floor(Math.random() * pool.length)] || rotatingMessages[0];
-    }
-
-    function rotateHomeMessage() {
-      const current = homeMessage.textContent || "";
-      homeMessage.classList.add("fade-out");
-      setTimeout(() => {
-        homeMessage.textContent = pickRandomMessage(current);
-        homeMessage.classList.remove("fade-out");
-      }, 240);
-    }
-
-    homeMessage.textContent = pickRandomMessage();
-    setInterval(rotateHomeMessage, 5000);
-
     const views = {
       home: document.getElementById("home-view"),
       games: document.getElementById("games-view"),
@@ -664,6 +667,32 @@
     const backBtn = document.getElementById("back-btn");
     const fullscreenBtn = document.getElementById("fullscreen-btn");
 
+    const homeMessage = document.getElementById("home-message");
+    const tickerMessages = [
+      "skyler, i know where you live",
+      "made by matteo, if you got this do NOT tell anyone you cant trust",
+      "uhhhhhhhhhhhhhhhhhhhhhhhhhhh"
+    ];
+    let tickerIndex = Math.floor(Math.random() * tickerMessages.length);
+
+    function nextTickerIndex() {
+      if (tickerMessages.length < 2) return 0;
+      let n = Math.floor(Math.random() * tickerMessages.length);
+      if (n === tickerIndex) n = (n + 1) % tickerMessages.length;
+      return n;
+    }
+
+    function runTicker(initial = false) {
+      if (!initial) tickerIndex = nextTickerIndex();
+      homeMessage.textContent = tickerMessages[tickerIndex];
+      homeMessage.classList.remove("run");
+      void homeMessage.offsetWidth;
+      homeMessage.classList.add("run");
+    }
+
+    homeMessage.addEventListener("animationend", () => runTicker(false));
+    runTicker(true);
+
     function norm(v) {
       return (v || "").toString().toLowerCase().trim();
     }
@@ -672,10 +701,10 @@
       for (const [key, node] of Object.entries(views)) {
         node.classList.toggle("active", key === name);
       }
-      navItems.forEach(btn => btn.classList.toggle("active", btn.dataset.view === name));
+      navItems.forEach((btn) => btn.classList.toggle("active", btn.dataset.view === name));
     }
 
-    navItems.forEach(btn => {
+    navItems.forEach((btn) => {
       btn.addEventListener("click", () => setView(btn.dataset.view));
     });
 
@@ -691,12 +720,11 @@
       return norm(text).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "game";
     }
 
-    function dedupeGames(list) {
+    function uniqueGames(list) {
       const seen = new Set();
       const out = [];
-
       for (const game of list) {
-        const key = norm(game.url) || norm(game.name);
+        const key = norm(game.url).replace(/\/+$/, "") || norm(game.name);
         if (!key || seen.has(key)) continue;
         seen.add(key);
         out.push(game);
@@ -704,43 +732,40 @@
       return out.map((g, i) => ({ ...g, id: i + 1 }));
     }
 
-    function markHot(game) {
-      return !!game.hot || HOT_NAMES.has(norm(game.name));
+    function sortGames(list) {
+      return [...list].sort((a, b) => {
+        if (a.hot !== b.hot) return a.hot ? -1 : 1;
+        return a.name.localeCompare(b.name);
+      });
     }
 
-    function mapGame(raw) {
+    function toGame(raw) {
       const name = raw.name || raw.title || "Untitled Game";
-      const url = raw.url || raw.embedUrl || raw.src || raw.link || "";
-      const icon = raw.icon || raw.image || raw.thumbnail || "";
-      return {
-        id: 0,
-        slug: raw.slug || slugify(name),
-        name,
-        url,
-        icon,
-        hot: markHot({ ...raw, name })
-      };
+      const url = raw.url || raw.embedUrl || raw.link || raw.src || raw.iframe || "";
+      const icon = raw.icon || raw.image || raw.thumbnail || raw.cover || raw.img || "";
+      const hot = !!raw.hot || HOT_NAMES.has(norm(name));
+      return { id: 0, slug: raw.slug || slugify(name), name, url, icon, hot };
     }
 
-    function walkGames(node, bucket) {
+    function walkGames(node, out, seen = new WeakSet()) {
+      if (!node) return;
+      if (typeof node === "object") {
+        if (seen.has(node)) return;
+        seen.add(node);
+      }
+
       if (Array.isArray(node)) {
-        node.forEach(v => walkGames(v, bucket));
+        node.forEach((x) => walkGames(x, out, seen));
         return;
       }
-      if (!node || typeof node !== "object") return;
 
-      const candidate = {
-        name: node.name || node.title,
-        url: node.url || node.embedUrl || node.gameUrl || node.link || node.src || node.iframe,
-        icon: node.icon || node.image || node.thumbnail || node.cover || node.img,
-        slug: node.slug
-      };
-
-      if (candidate.name && candidate.url && /^https?:\/\//i.test(candidate.url)) {
-        bucket.push(mapGame(candidate));
+      if (typeof node === "object") {
+        const candidate = toGame(node);
+        if (candidate.name && candidate.url && /^https?:\/\//i.test(candidate.url)) {
+          out.push(candidate);
+        }
+        Object.values(node).forEach((v) => walkGames(v, out, seen));
       }
-
-      Object.values(node).forEach(v => walkGames(v, bucket));
     }
 
     async function fetchJson(url) {
@@ -771,10 +796,7 @@
         url: "https://rawcdn.githack.com/3kh0/3kh0-assets/main/ovo/index.html",
         icon: "https://raw.githubusercontent.com/3kh0/3kh0-assets/main/ovo/ovo.png",
         hot: true
-      }
-    ].map(mapGame);
-
-    const fallbackGames = [
+      },
       {
         name: "Cookie Clicker",
         url: "https://rawcdn.githack.com/3kh0/3kh0-assets/main/cookieclicker/index.html",
@@ -783,20 +805,13 @@
       },
       {
         name: "1v1.LOL",
-        url: "https://binbashbanana.github.io/webretro/",
+        url: "https://1v1.lol",
         icon: "https://www.google.com/s2/favicons?sz=256&domain_url=https://1v1.lol",
         hot: true
       }
-    ].map(mapGame);
+    ].map(toGame);
 
     let allGames = [];
-
-    function sortGames(list) {
-      return [...list].sort((a, b) => {
-        if (a.hot !== b.hot) return a.hot ? -1 : 1;
-        return a.name.localeCompare(b.name);
-      });
-    }
 
     function renderGames(list) {
       gameGrid.innerHTML = "";
@@ -805,21 +820,21 @@
         return;
       }
 
-      const frag = document.createDocumentFragment();
+      const fragment = document.createDocumentFragment();
       list.forEach((game, idx) => {
         const btn = document.createElement("button");
-        btn.className = "game-card";
         btn.type = "button";
+        btn.className = "game-card";
         btn.title = game.name;
         btn.setAttribute("aria-label", game.name);
 
         const img = document.createElement("img");
-        img.src = game.icon || `https://www.google.com/s2/favicons?sz=256&domain_url=${encodeURIComponent(game.url)}`;
+        img.src = game.icon || "https://www.google.com/s2/favicons?sz=256&domain_url=" + encodeURIComponent(game.url);
         img.alt = game.name;
         img.loading = "lazy";
         img.referrerPolicy = "no-referrer";
         img.onerror = () => {
-          img.src = `https://www.google.com/s2/favicons?sz=256&domain_url=${encodeURIComponent(game.url)}`;
+          img.src = "https://www.google.com/s2/favicons?sz=256&domain_url=" + encodeURIComponent(game.url);
         };
 
         if (game.hot) {
@@ -829,40 +844,40 @@
           btn.appendChild(hot);
         }
 
-        const label = document.createElement("span");
-        label.className = "game-name";
-        label.textContent = game.name;
+        const name = document.createElement("span");
+        name.className = "game-name";
+        name.textContent = game.name;
 
         btn.appendChild(img);
-        btn.appendChild(label);
+        btn.appendChild(name);
         btn.addEventListener("click", () => openGame(game));
 
-        frag.appendChild(btn);
+        fragment.appendChild(btn);
         setTimeout(() => btn.classList.add("in"), idx * 8);
       });
-      gameGrid.appendChild(frag);
+
+      gameGrid.appendChild(fragment);
     }
 
     function applyGamesFilter() {
       const q = norm(gamesSearch.value);
-      const filtered = q ? allGames.filter(g => norm(g.name).includes(q)) : allGames;
+      const filtered = q ? allGames.filter((g) => norm(g.name).includes(q)) : allGames;
       renderGames(sortGames(filtered));
     }
 
     async function loadGames() {
       gameGrid.innerHTML = '<p class="empty">Loading games...</p>';
 
-      const [g1, g2] = await Promise.all([
+      const [s1, s2] = await Promise.all([
         fetchJson("https://selenite-copy.pages.dev/games.json"),
         fetchJson("https://1kh0.github.io/config/games.json")
       ]);
 
       const extracted = [];
-      walkGames(g1, extracted);
-      walkGames(g2, extracted);
+      walkGames(s1, extracted);
+      walkGames(s2, extracted);
 
-      const merged = dedupeGames([...customGames, ...extracted, ...fallbackGames].filter(g => g.url));
-      allGames = sortGames(merged);
+      allGames = sortGames(uniqueGames([...customGames, ...extracted].filter((g) => g.url)));
       applyGamesFilter();
     }
 
@@ -881,10 +896,8 @@
       toggleTrigger.textContent = "HIDE BAR";
       showStatus("loading...");
       frame.src = "about:blank";
-
       frame.onload = () => hideStatus();
       frame.onerror = () => showStatus("blocked in iframe");
-
       requestAnimationFrame(() => {
         frame.src = game.url;
       });
@@ -926,7 +939,6 @@
       { name: "Windows XP Error", url: "https://www.myinstants.com/media/sounds/erro.mp3" },
       { name: "MLG AIR HORN", url: "https://www.myinstants.com/media/sounds/mlg-airhorn.mp3" },
       { name: "ROBLOX oof", url: "https://www.myinstants.com/media/sounds/roblox-death-sound_1.mp3" },
-      { name: "The Price is Right Losing Horn", url: "https://www.myinstants.com/media/sounds/the-price-is-right-losing-horn.mp3" },
       { name: "Wrong Answer Buzzer", url: "https://www.myinstants.com/media/sounds/wrong-answer-buzzer.mp3" },
       { name: "FNAF Jumpscare Scream", url: "https://www.myinstants.com/media/sounds/five-nights-at-freddys-full-scream-sound_2.mp3" },
       { name: "Coin Mario", url: "https://www.myinstants.com/media/sounds/super-mario-coin-sound.mp3" },
@@ -937,7 +949,6 @@
       { name: "Sad Violin", url: "https://www.myinstants.com/media/sounds/tf_nemesis.mp3" },
       { name: "Taco Bell Bong", url: "https://www.myinstants.com/media/sounds/taco-bell-bong-sfx.mp3" },
       { name: "Fart Meme Sound", url: "https://www.myinstants.com/media/sounds/fart-meme-sound.mp3" },
-      { name: "Ding Sound Effect", url: "https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" },
       { name: "Shut up!", url: "https://www.myinstants.com/media/sounds/shutup.swf.mp3" },
       { name: "Prowler Sound Effect", url: "https://www.myinstants.com/media/sounds/prowler-sound-effect_6bXErot.mp3" },
       { name: "Dune Scream", url: "https://www.myinstants.com/media/sounds/dune-scream.mp3" },
@@ -986,18 +997,60 @@
       { name: "Rizz walk", url: "https://www.myinstants.com/media/sounds/rizz-walk.mp3" },
       { name: "Shocked sound", url: "https://www.myinstants.com/media/sounds/shocked-sound-effect.mp3" },
       { name: "Buzzer", url: "https://www.myinstants.com/media/sounds/wrong-answer-sound-effect.mp3" },
-      { name: "Applausing", url: "https://www.myinstants.com/media/sounds/applausing.mp3" }
+      { name: "Applausing", url: "https://www.myinstants.com/media/sounds/applausing.mp3" },
+      { name: "Ding Sound Effect", url: "https://www.myinstants.com/media/sounds/ding-sound-effect_2.mp3" },
+      { name: "Windows XP Startup", url: "https://www.myinstants.com/media/sounds/windows-xp-startup.mp3" },
+      { name: "Door Knocking", url: "https://www.myinstants.com/media/sounds/crazy-realistic-knocking-sound-troll-twitch-streamers_small.mp3" },
+      { name: "Spongebob A Few Moments Later", url: "https://www.myinstants.com/media/sounds/a-few-moments-later-hd.mp3" },
+      { name: "Directed by Robert B Weide", url: "https://www.myinstants.com/media/sounds/directed-by-robert-b_voI2Z4T.mp3" },
+      { name: "Correct Answer GameShow", url: "https://www.myinstants.com/media/sounds/correct.mp3" },
+      { name: "Fail Sound Meme", url: "https://www.myinstants.com/media/sounds/fail-sound-effect.mp3" },
+      { name: "Darth Vader Theme", url: "https://www.myinstants.com/media/sounds/darth-vader-theme.mp3" },
+      { name: "Prowler Intense", url: "https://www.myinstants.com/media/sounds/prowler-intense.mp3" },
+      { name: "Crow Sound Caw", url: "https://www.myinstants.com/media/sounds/raven-caw-caw.mp3" },
+      { name: "Free Bird Solo", url: "https://www.myinstants.com/media/sounds/free-bird-solo.mp3" },
+      { name: "Subway Surfers Bass Boosted", url: "https://www.myinstants.com/media/sounds/subway-surfers-bass-boosted.mp3" },
+      { name: "20th Century Fox Fanfare", url: "https://www.myinstants.com/media/sounds/20th-century-fox-fanfare.mp3" },
+      { name: "Transformers Transforming", url: "https://www.myinstants.com/media/sounds/transforming-sound-from-the-transformers.mp3" },
+      { name: "JAWS THEME", url: "https://www.myinstants.com/media/sounds/jaws-theme_TDORPKA.mp3" },
+      { name: "Austin Powers Yeah Baby", url: "https://www.myinstants.com/media/sounds/austin-powers-yeah-babay.mp3" },
+      { name: "Dark Souls Pain", url: "https://www.myinstants.com/media/sounds/voice-mx-damage-m-1.mp3" },
+      { name: "Nuclear Fart", url: "https://www.myinstants.com/media/sounds/nuclear-fart-1.mp3" },
+      { name: "Family Feud YES", url: "https://www.myinstants.com/media/sounds/family-feud-good-answer.mp3" },
+      { name: "Danger Alarm Meme", url: "https://www.myinstants.com/media/sounds/danger-alarm-sound-effect-meme.mp3" },
+      { name: "Careless Whisper", url: "https://www.myinstants.com/media/sounds/careless_whispers.mp3" },
+      { name: "Wet Fart", url: "https://www.myinstants.com/media/sounds/wet-fart_1.mp3" },
+      { name: "Sonic.exe scream", url: "https://www.myinstants.com/media/sounds/sonic-exe-scream.mp3" },
+      { name: "FNAF Balloon Boy Hello", url: "https://www.myinstants.com/media/sounds/echo3b.mp3" },
+      { name: "Re:Zero Return by Death", url: "https://www.myinstants.com/media/sounds/re-zero-return-by-death.mp3" },
+      { name: "Pop SFX", url: "https://www.myinstants.com/media/sounds/pop_7e9Is8L.mp3" },
+      { name: "Meme final", url: "https://www.myinstants.com/media/sounds/meme-de-creditos-finales.mp3" },
+      { name: "Sus Anime Sound", url: "https://www.myinstants.com/media/sounds/sus-anime-sound.mp3" },
+      { name: "Zelda chest opening", url: "https://www.myinstants.com/media/sounds/zelda-chest-opening-and-item-catch.mp3" },
+      { name: "Yamate Kudesai", url: "https://www.myinstants.com/media/sounds/yamate-kudesai.mp3" },
+      { name: "Fears to Fathom Notification", url: "https://www.myinstants.com/media/sounds/fears-to-fathom-notification-sound.mp3" },
+      { name: "MICHAEL DONT LEAVE ME HERE", url: "https://www.myinstants.com/media/sounds/michael-dont-leave-me-here.mp3" },
+      { name: "Super Mario Beedoo", url: "https://www.myinstants.com/media/sounds/super-mario-beedoo_F3cwLoe.mp3" },
+      { name: "Sad meow song", url: "https://www.myinstants.com/media/sounds/sad-meow-song.mp3" },
+      { name: "Baby laughing meme", url: "https://www.myinstants.com/media/sounds/baby-laughing-meme.mp3" },
+      { name: "LIZARD BUTTON", url: "https://www.myinstants.com/media/sounds/lizard-button.mp3" },
+      { name: "Long brain fart", url: "https://www.myinstants.com/media/sounds/long-brain-fart.mp3" },
+      { name: "Goo goo gagaaa", url: "https://www.myinstants.com/media/sounds/goo-goo-gagaaa.mp3" },
+      { name: "M e o w", url: "https://www.myinstants.com/media/sounds/m-e-o-w.mp3" },
+      { name: "GunShottttt", url: "https://www.myinstants.com/media/sounds/gunshotjbudden.mp3" },
+      { name: "Goku drip", url: "https://www.myinstants.com/media/sounds/drip-goku-meme-song-original-dragon-ball-super-music-clash-of-gods-in-description.mp3" },
+      { name: "Oh My God Meme", url: "https://www.myinstants.com/media/sounds/oh-my-god-meme.mp3" }
     ];
 
-    const soundPlayers = new Map();
+    const players = new Map();
 
     function getPlayer(url) {
-      if (!soundPlayers.has(url)) {
+      if (!players.has(url)) {
         const a = new Audio(url);
         a.preload = "none";
-        soundPlayers.set(url, a);
+        players.set(url, a);
       }
-      return soundPlayers.get(url);
+      return players.get(url);
     }
 
     function playSound(url) {
@@ -1013,24 +1066,24 @@
         return;
       }
 
-      const frag = document.createDocumentFragment();
-      list.forEach((s, idx) => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "sound-btn";
-        btn.setAttribute("aria-label", s.name);
-        btn.innerHTML = `<span class="sound-label">${s.name}</span>`;
-        btn.addEventListener("click", () => playSound(s.url));
+      const fragment = document.createDocumentFragment();
+      list.forEach((sound, idx) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "sound-btn";
+        button.setAttribute("aria-label", sound.name);
+        button.innerHTML = '<span class="sound-label">' + sound.name + "</span>";
+        button.addEventListener("click", () => playSound(sound.url));
 
-        frag.appendChild(btn);
-        setTimeout(() => btn.classList.add("in"), idx * 5);
+        fragment.appendChild(button);
+        setTimeout(() => button.classList.add("in"), idx * 4);
       });
-      soundGrid.appendChild(frag);
+      soundGrid.appendChild(fragment);
     }
 
     function applySoundsFilter() {
       const q = norm(soundsSearch.value);
-      const filtered = q ? allSounds.filter(s => norm(s.name).includes(q)) : allSounds;
+      const filtered = q ? allSounds.filter((s) => norm(s.name).includes(q)) : allSounds;
       renderSounds(filtered);
     }
 
